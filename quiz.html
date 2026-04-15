@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>効果測定テスト クイズ</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Hiragino Sans', 'Meiryo', sans-serif;
+      background: linear-gradient(135deg, #e0f7fa 0%, #e8eaf6 30%, #fce4ec 60%, #fff9c4 100%);
+      background-attachment: fixed;
+      color: #444;
+      min-height: 100vh;
+      padding: 32px 16px 80px;
+    }
+
+    .page-header {
+      text-align: center;
+      margin-bottom: 12px;
+      animation: dropIn 0.5s ease both;
+    }
+    @keyframes dropIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .page-header h1 {
+      font-size: 2rem;
+      color: #00695c;
+    }
+    .page-header p {
+      font-size: 0.95rem;
+      color: #4db6ac;
+      margin-top: 4px;
+    }
+
+    .nav-bar {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .nav-bar a {
+      font-size: 0.82rem;
+      color: #00695c;
+      text-decoration: none;
+      padding: 6px 16px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.7);
+      border: 1px solid rgba(0,105,92,0.2);
+      transition: all 0.2s;
+    }
+    .nav-bar a:hover { background: rgba(0,105,92,0.1); }
+    .nav-bar a.current { background: #80cbc4; color: #fff; border-color: #80cbc4; }
+
+    /* Score board */
+    .score-board {
+      max-width: 720px;
+      margin: 0 auto 24px;
+      background: rgba(255,255,255,0.9);
+      backdrop-filter: blur(8px);
+      border-radius: 16px;
+      padding: 20px 24px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      border: 1px solid rgba(255,255,255,0.9);
+      position: sticky;
+      top: 12px;
+      z-index: 10;
+    }
+    .score-board .score-text {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: #00695c;
+    }
+    .score-board .score-sub {
+      font-size: 0.8rem;
+      color: #80cbc4;
+      margin-top: 4px;
+    }
+    .score-bar-outer {
+      height: 10px;
+      background: #e0f2f1;
+      border-radius: 5px;
+      margin-top: 10px;
+      overflow: hidden;
+    }
+    .score-bar-inner {
+      height: 100%;
+      background: linear-gradient(90deg, #4db6ac, #00897b);
+      border-radius: 5px;
+      width: 0%;
+      transition: width 0.5s ease;
+    }
+
+    .questions {
+      max-width: 720px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .q-card {
+      background: rgba(255,255,255,0.88);
+      backdrop-filter: blur(8px);
+      border-radius: 16px;
+      padding: 22px 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      border: 1px solid rgba(255,255,255,0.9);
+    }
+
+    .q-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .q-num {
+      font-size: 0.72rem;
+      font-weight: bold;
+      color: #fff;
+      background: linear-gradient(135deg, #4db6ac, #00897b);
+      padding: 3px 12px;
+      border-radius: 12px;
+    }
+    .q-theme {
+      font-size: 0.78rem;
+      color: #80cbc4;
+    }
+
+    .q-text {
+      font-size: 1rem;
+      font-weight: bold;
+      color: #1b5e20;
+      line-height: 1.6;
+      margin-bottom: 16px;
+      padding-left: 4px;
+    }
+
+    .reveal-btn {
+      display: inline-block;
+      padding: 8px 24px;
+      background: linear-gradient(135deg, #80cbc4, #4db6ac);
+      color: #fff;
+      border: none;
+      border-radius: 24px;
+      font-size: 0.88rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .reveal-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,105,92,0.25);
+    }
+    .reveal-btn:active { transform: translateY(0); }
+    .reveal-btn.revealed {
+      background: #e0e0e0;
+      color: #999;
+      cursor: default;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .answer-area {
+      display: none;
+      margin-top: 16px;
+      padding: 16px 18px;
+      background: linear-gradient(135deg, #e0f2f144, #e8f5e944);
+      border-radius: 12px;
+      border-left: 3px solid #4db6ac;
+    }
+    .answer-area.show { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .answer-label {
+      font-size: 0.72rem;
+      font-weight: bold;
+      color: #00897b;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+    .answer-text {
+      font-size: 0.88rem;
+      line-height: 1.7;
+      color: #555;
+    }
+    .answer-text strong { color: #00695c; }
+    .answer-point {
+      margin-top: 10px;
+      font-size: 0.82rem;
+      color: #4db6ac;
+      font-style: italic;
+    }
+
+    .check-area {
+      display: none;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px dashed #c8e6c9;
+    }
+    .check-area.show { display: flex; gap: 10px; }
+
+    .check-btn {
+      padding: 6px 18px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: bold;
+      border: 2px solid;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+      background: transparent;
+    }
+    .check-btn.correct {
+      border-color: #81c784;
+      color: #2e7d32;
+    }
+    .check-btn.correct:hover, .check-btn.correct.active {
+      background: #81c784;
+      color: #fff;
+    }
+    .check-btn.wrong {
+      border-color: #ef9a9a;
+      color: #c62828;
+    }
+    .check-btn.wrong:hover, .check-btn.wrong.active {
+      background: #ef9a9a;
+      color: #fff;
+    }
+    .check-btn.active { cursor: default; }
+
+    .result-area {
+      max-width: 720px;
+      margin: 32px auto 0;
+      background: rgba(255,255,255,0.92);
+      border-radius: 16px;
+      padding: 28px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      display: none;
+    }
+    .result-area.show { display: block; animation: fadeIn 0.4s ease; }
+    .result-emoji { font-size: 3rem; margin-bottom: 8px; }
+    .result-msg {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #00695c;
+      margin-bottom: 6px;
+    }
+    .result-sub {
+      font-size: 0.88rem;
+      color: #80cbc4;
+    }
+    .retry-btn {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 10px 28px;
+      background: linear-gradient(135deg, #80cbc4, #4db6ac);
+      color: #fff;
+      border: none;
+      border-radius: 24px;
+      font-size: 0.92rem;
+      font-weight: bold;
+      cursor: pointer;
+      font-family: inherit;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .retry-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,105,92,0.25); }
+
+    @media (max-width: 600px) {
+      body { padding: 20px 10px 60px; }
+      .page-header h1 { font-size: 1.5rem; }
+      .q-card { padding: 18px 16px; }
+      .score-board { padding: 14px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="page-header">
+    <h1>効果測定クイズ</h1>
+    <p>全17問！どれだけ覚えてるかチャレンジしてみよう</p>
+  </div>
+
+  <nav class="nav-bar">
+    <a href="review.html">復習ノート</a>
+    <a href="quiz.html" class="current">クイズに挑戦</a>
+    <a href="index.html">ポートフォリオ</a>
+  </nav>
+
+  <div class="score-board">
+    <div class="score-text"><span id="correct-count">0</span> / <span id="total-count">17</span> 問正解</div>
+    <div class="score-sub">答えを見て、できたかどうか自分でチェックしてね</div>
+    <div class="score-bar-outer"><div class="score-bar-inner" id="score-bar"></div></div>
+  </div>
+
+  <div class="questions">
+
+    <!-- Q1 -->
+    <div class="q-card" data-q="1">
+      <div class="q-header">
+        <span class="q-num">Q1</span>
+        <span class="q-theme">🏠 研修の根本</span>
+      </div>
+      <div class="q-text">「仕事とは何ですか？」を一言で答えてみよう。<br>また、TOKIUMが伝えた「目指す人物像」の4要素は？</div>
+      <button class="reveal-btn" onclick="reveal(this)">答えを見る</button>
+      <div class="answer-area">
+        <div class="answer-label">こたえ</div>
+        <div class="answer-text">
+          仕事とは → <strong>ステークホルダーを安心させること</strong><br><br>
+          目指す人物像の4要素 → <strong>「5年後に」「組織を牽引する」「異常な情熱を持つ」「リーダー」</strong>
+        </div>
+        <div class="answer-point">「5年後」と「組織を牽引」が抜けやすいので注意！</div>
+      </div>
+      <div class="check-area">
+        <button class="check-btn correct" onclick="check(this, true)">できた！</button>
+        <button class="check-btn wrong" onclick="check(this, false)">もう一回復習する</button>
+      </div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="q-card" data-q="2">
+      <div class="q-header">
+        <span class="q-num">Q2</span>
+        <span class="q-theme">💪 6動詞</span>
+      </div>
+      <div class="q-text">ビジネスの基本動作「6つの動詞」を全て挙げてみよう。<br>「学ぶ」の定義は何だった？</div>
+      <button class="reveal-btn" onclick="reveal(this)">答えを見る</button>
+      <div class="answer-area">
+        <div class="answer-label">こたえ</div>
+        <div class="answer-text">
+          6動詞 → <strong>学ぶ・聴く・読む・書く・話す・巻き込む</strong><br><br>
+          「学ぶ」の定義 → <strong>教わったことを、翌日、自力で100%再現できること</strong>
+        </div>
+        <div class="answer-point">「100%再現」がキーワード！復習 vs 新しい本の問題では「バケツの穴」「アクティブリコール」にも触れよう</div>
+      </div>
+      <div class="check-area">
+        <button class="check-btn correct" onclick="check(this, true)">できた！</button>
+        <button class="check-btn wrong" onclick="check(this, false)">もう一回復習する</button>
+      </div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="q-card" data-q="3">
+      <div class="q-header">
+        <span class="q-num">Q3</span>
+        <span class="q-theme">☂️ 空・雨・傘</span>
+      </div>
+      <div class="q-text">空・雨・傘の3層はそれぞれ何を表す？<br>「なぜ3層に分けて伝えるの？」の目的も答えてみよう。</div>
+      <button class="reveal-btn" onclick="reveal(this)">答えを見る</button>
+      <div class="answer-area">
+        <div class="answer-label">こたえ</div>
+        <div class="answer-text">
+          <strong>空</strong> = 事実　<strong>雨</strong> = 解釈　<strong>傘</strong> = 提案<br><br>
+          目的 → <strong>上司の思考コストを下げて、信頼残高を貯めるため</strong>
+        </div>
+        <div class="answer-point">傘（提案）には「何を」「いつまでに」を入れるのがポイント！</div>
+      </div>
+      <div class="check-area">
+        <button class="check-btn correct" onclick="check(this, true)">できた！</button>
+        <button class="check-btn wrong" onclick="check(this, false)">もう一回復習する</button>
+      </div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="q-card" data-q="4">
+      <div class="q-header">
+        <span class="q-num">Q4</span>
+        <span class="q-theme">🔍 具体と抽象</span>
+      </div>
+      <div class="q-text">具体的な行動を書くときに使ってはいけないNGワードは？<br>代わりにどんな形で書くべき？</div>
+      <button class="reveal-btn" onclick="reveal(this)">答えを見る</button>
+      <div class="answer-area">
+        <div class="answer-label">こたえ</div>
+        <div class="answer-text">
+          NGワード → <strong>「意識する」「気をつける」</strong>など曖昧な表現<br><br>
+          代わりに → <strong>「誰が・いつまでに・何を」</strong>が明確で、すぐ動ける粒度で書く
+        </div>
+        <div class="answer-point">例：「明日から会議のたびにノートを開いて決定事項を1行ずつ記録する」のように具体的に！</div>
+      </div>
+      <div class="check-area">
+        <button class="check-btn correct" onclick="check(this, true)">できた！</button>
+        <button class="check-btn wrong" onclick="check(this, false)">もう一回復習する</button>
+      </div>
+    </div>
+
+    <!-- Q5 -->
+    <div class="q-card" data-q="5">
+      <div class="q-header">
+        <span class="q-num">Q5</span>
+        <span class="q-theme">✍️ 簡潔にロジカル</span>
+      </div>
+      <div class="q-text">PREP法の4つの要素と、文章を簡潔にする4原則を挙げてみよう。</div>
+      <button class="reveal-btn" onclick="reveal(this)">答えを見る</button>
+      <div class="answer-area">
+        <div class="answer-label">こたえ</div>
+        <div class="answer-text">
+          PREP法 → <strong>P（結論）→ R（理由）→ E（具体例）→ P（再結論）</strong><br><br>
+          4原則 → <strong>①1文1メッセージ ②接続詞を8割削る ③修飾語を削る ④能動態で書く</strong>
+        </div>
+        <div class="answer-point">上司の時間を奪わないため＆後回しにされないために圧縮する！</div>
+      </div>
+      <div class="check-area">
+        <button class="check-btn correct" onclick="check(this, true)">できた！</button>
+        <button class="check-btn wrong" onclick="check(this, false)">もう一回復習する</button>
+      </div>
+    </div>
+
+    <!-- Q6 -->
+    <div class="q-card" data-q="6">
+      <div class="q-header">
+        <span class="q-num">Q6</span>
+        <span class="q-theme">✅ アクション返答</span>
+      </div>
+      <div class="q-text">上司に仕事を頼まれたとき、「了解しました」の返事に必要な3要素は？</div>
+      <button class="reveal-btn" onclick="reveal(this)">答えを見る</button>
+      <div class="answer-area">
+        <div class="answer-label">こたえ</div>
+        <div class="answer-text">
+          <strong>①何の件か ②承知しました ③何をいつまでにするか</strong><br><br>
+          例：「アンケート集計の件、承知しました。<strong>本日18時までに</strong>集計してお送りします。」
+        </div>
+        <div class="answer-point">「承知しました」だけだと上司が「いつ届くの？」と追加確認する羽目に…</div>
+      </div>
+      <div class="check-area">
+        <button class="check-btn correct" onclick="check(this, true)">できた！</button>
+        <button class="check-btn wrong" onclick="check(this, false)">もう一回復習する</button>
+      </div>
+    </div>
+
+    <!-- Q7 -->
+    <div class="q-card" data-q="7">
+      <div class="q-header">
+        <span class="q-num">Q7</span>
+        <span class="q-theme">📐 20%ルール</span>
+      </div>
+      <div class="q-text">骨子の3要素は？ 手戻りを防ぐための3ステップも答えてみよう。</div>
+      <button class="reveal-btn" onclick="reveal(this)">答えを見る</button>
+      <div class="answer-area">
+        <div class="answer-label">こたえ</div>
+        <div class="answer-text">
+          骨子の3要素 → <strong>タイトル・結論・構成</strong><br><br>
+          3ステップ → <strong>①骨子を先に作る ②方向性確認を依頼する ③合意後に作り込む</strong>
+        </div>
+        <div class="answer-point">100%作ってから見せるのはリスク大！20%の段階で方向性を確認しよう</div>
+      </div>
+      <div class="check-area">
+        <button class="check-btn correct" onclick="check(this, true)">できた！</button>
+        <button class="check-btn wrong" onclick="check(this, false)">もう一回復習する</button>
+      </div>
+    </div>
+
+    <!-- Q8 -->
+    <div class="q-card" data-q="8">
+      <div class="q-header">
+        <span class="q-num">Q8</span>
+        <span class="q-theme">🤔 仮説付き質問</span>
+      </div>
+      <div class="q-text">仮説付き質問の3つの型と、それぞれの「口癖」を言えるかな？</div>
+      <button class="reveal-btn" onclick="reveal(this)">答えを見る</button>
+      <div class="answer-area">
+        <div class="answer-label">こたえ</div>
+        <div class="answer-text">
+          <strong>①検証型</strong> →「私はAだと思うのですが、合っていますか？」<br>
+          <strong>②比較提示型</strong> →「BとCで迷っています。〇〇の理由でBが良いと思いますが…」<br>
+          <strong>③根拠参照型</strong> →「資料の△△に基づき、今回も適用可能と考えますが？」
+        </div>
+        <div class="answer-point">相手がYes/Noで答えられる形にするのがコツ！</div>
+      </div>
+      <div class="check-area">
+        <button class="check-btn correct" onclick="check(this, true)">できた！</button>
+        <button class="check-btn wrong" onclick="check(this, false)">もう一回復習する</button>
+      </div>
+    </div>
+
+    <!-- Q9 -->
+    <div class="q-card" data-q="9">
+      <div class="q-header">
+        <span class="q-num">Q9</span>
+        <span class="q-theme">🙏 相手の立場を想像した依頼</span>
+      </div>
+      <div class="q-text">誰かに何かをお願いするとき、依頼文に必要な4要素は？</div>
+      <button class="reveal-btn" onclick="reveal(this)">答えを見る</button>
+      <div class="answer-area">
+        <div class="answer-label">こたえ</div>
+        <div class="answer-text">
+          <strong>①専門性への敬意</strong>（なぜあなたに頼むのか）<br>
+          <strong>②主導権の譲渡</strong>（日程の調整余地を持たせる）<br>
+          <strong>③断る余地</strong>（「繁忙期が終わってからでも構いません」など）<br>
+          <strong>④感謝の明文化</strong>（ちゃんとお礼を言葉にする）
+        </div>
+        <div class="answer-point">得点率34%の苦手テーマ。相手の多忙さや立場に配慮できているかがカギ！</div>
+      </div>
+      <div class="check-area">
+        <button class="check-btn correct" onclick="check(this, true)">できた！</button>
+        <button class="check-btn wrong" onclick="check(this, false)">もう一回復習する</button>
+      </div>
+    </div>
+
+    <!-- Q10 -->
+    <div class="q-card" data-q="10">
+      <div class="q-header">
+        <span class="q-num">Q10</span>
+        <span class="q-theme">📣 報連相の技術</span>
+      </div>
+      <div class="q-text">報連相の「第一声」で何をすべき？<br>理想の報連相メッセージに必要な3要素は？</div>
+      <button class="reveal-btn" onclick="reveal(this)">答えを見る</button>
+      <div class="answer-area">
+        <div class="answer-label">こたえ</div>
+        <div class="answer-text">
+          第一声 → <strong>「報告/連絡/相談」のどれかを宣言する</strong><br><br>
+          3要素 → <strong>①種別宣言 ②結論ファースト ③自分なりの仮説を添える</strong><br><br>
+          NG → 丸投げ相談（「どうしたらいいですか？」）
+        </div>
+        <div class="answer-point">「ご相談です。〇〇と考えていますがいかがですか？」の形がベスト！</div>
+      </div>
+      <div class="check-area">
+        <button class="check-btn correct" onclick="check(this, true)">できた！</button>
+        <button class="check-btn wrong" onclick="check(this, false)">もう一回復習する</button>
+      </div>
+    </div>
+
+    <!-- Q11 -->
+    <div class="q-card" data-q="11">
+      <div class="q-header">
+        <span class="q-num">Q11</span>
+        <span class="q-theme">🚨 バッドニュース15分ルール</span>
+      </div>
+      <div class="q-text">一次報告テンプレートの4要素は？<br>（みんなの得点率26%、一番むずかしかった問題！）</div>
+      <button class="reveal-btn" onclick="reveal(this)">答えを見る</button>
+      <div class="answer-area">
+        <div class="answer-label">こたえ</div>
+        <div class="answer-text">
+          <strong>①状況</strong>（今何が起きているか）<br>
+          <strong>②原因</strong>（なぜ起きたか）<br>
+          <strong>③経過</strong>（これまでの対応）<br>
+          <strong>④対応案</strong>（これからどうするか）<br><br>
+          冒頭で<strong>「バッドニュースの報告です」</strong>と宣言 ＋ <strong>15分以内</strong>に報告！
+        </div>
+        <div class="answer-point">「すぐ報告する」は書けても4要素が出てこない人がほとんどだった。ここは確実に覚えよう！</div>
+      </div>
+      <div class="check-area">
+        <button class="check-btn correct" onclick="check(this, true)">できた！</button>
+        <button class="check-btn wrong" onclick="check(this, false)">もう一回復習する</button>
+      </div>
+    </div>
+
+    <!-- Q12 -->
+    <div class="q-card" data-q="12">
+      <div class="q-header">
+        <span class="q-num">Q12</span>
+        <span class="q-theme">🎯 ネクストアクション</span>
+      </div>
+      <div class="q-text">ネクストアクション（NA）の4要素を答えてみよう。</div>
+      <button class="reveal-btn" onclick="reveal(this)">答えを見る</button>
+      <div class="answer-area">
+        <div class="answer-label">こたえ</div>
+        <div class="answer-text">
+          <strong>①Who</strong>（誰が）<br>
+          <strong>②When</strong>（いつまでに）<br>
+          <strong>③What</strong>（何を）<br>
+          <strong>④Done条件</strong>（何をもって完了とするか）
+        </div>
+        <div class="answer-point">「次回までに進捗共有」→ NG！「Mさんが4/15 17:00までにデザイン案をSlackに投稿し、全員からOKを得る」→ OK！</div>
+      </div>
+      <div class="check-area">
+        <button class="check-btn correct" onclick="check(this, true)">できた！</button>
+        <button class="check-btn wrong" onclick="check(this, false)">もう一回復習する</button>
+      </div>
+    </div>
+
+    <!-- Q13 -->
+    <div class="q-card" data-q="13">
+      <div class="q-header">
+        <span class="q-num">Q13</span>
+        <span class="q-theme">🪞 振り返りの技術</span>
+      </div>
+      <div class="q-text">振り返りに必要な4要素は？<br>また、絶対に使ってはいけないNGワードは？</div>
+      <button class="reveal-btn" onclick="reveal(this)">答えを見る</button>
+      <div class="answer-area">
+        <div class="answer-label">こたえ</div>
+        <div class="answer-text">
+          4要素 →<br>
+          <strong>①問題点指摘</strong>（何がうまくいかなかったか）<br>
+          <strong>②Why分析</strong>（なぜうまくいかなかったか）<br>
+          <strong>③因数分解</strong>（量の問題か質の問題か）<br>
+          <strong>④具体トライ</strong>（来週何をどうするか）<br><br>
+          NGワード → <strong>「頑張る」「しっかり」「気をつける」</strong>
+        </div>
+        <div class="answer-point">NGワードを使うと原因が特定できず、同じ失敗を繰り返しちゃう</div>
+      </div>
+      <div class="check-area">
+        <button class="check-btn correct" onclick="check(this, true)">できた！</button>
+        <button class="check-btn wrong" onclick="check(this, false)">もう一回復習する</button>
+      </div>
+    </div>
+
+    <!-- Q14 -->
+    <div class="q-card" data-q="14">
+      <div class="q-header">
+        <span class="q-num">Q14</span>
+        <span class="q-theme">🚀 「新卒」を脱ぎ捨てる</span>
+      </div>
+      <div class="q-text">「受け身はまずい」のはなぜ？<br>TOKIUMの組織特性に触れて説明してみよう。</div>
+      <button class="reveal-btn" onclick="reveal(this)">答えを見る</button>
+      <div class="answer-area">
+        <div class="answer-label">こたえ</div>
+        <div class="answer-text">
+          TOKIUMは「<strong>スピード100で走りながら整える</strong>」組織。<strong>不確実な環境で自分から動き出す力</strong>が求められるため、100%整うのを待つ受け身姿勢では配属初日に止まってしまう。
+        </div>
+        <div class="answer-point">「他責はダメ」だけだと不十分。TOKIUMの組織特性（走りながら整える＋不確実な環境）に触れよう！</div>
+      </div>
+      <div class="check-area">
+        <button class="check-btn correct" onclick="check(this, true)">できた！</button>
+        <button class="check-btn wrong" onclick="check(this, false)">もう一回復習する</button>
+      </div>
+    </div>
+
+    <!-- Q15 -->
+    <div class="q-card" data-q="15">
+      <div class="q-header">
+        <span class="q-num">Q15</span>
+        <span class="q-theme">🔥 食らいつく精神</span>
+      </div>
+      <div class="q-text">次のケース、「回避型」と「食らいつき型」どっち？<br>A. 会議中に黙って後でこっそり調べた<br>B. テストの間違いをその日のうちにメモなしで確認した</div>
+      <button class="reveal-btn" onclick="reveal(this)">答えを見る</button>
+      <div class="answer-area">
+        <div class="answer-label">こたえ</div>
+        <div class="answer-text">
+          A. → <strong>回避型</strong>（その場で聞くべき！後で調べても会議中のズレは取り返せない）<br><br>
+          B. → <strong>食らいつき型</strong>（アクティブリコールの実践。間違いをその日のうちに潰してる！）
+        </div>
+        <div class="answer-point">「次回がんばろう」も回避型。いつ・何をするか決まってないと食らいつけてない！</div>
+      </div>
+      <div class="check-area">
+        <button class="check-btn correct" onclick="check(this, true)">できた！</button>
+        <button class="check-btn wrong" onclick="check(this, false)">もう一回復習する</button>
+      </div>
+    </div>
+
+    <!-- Q16 -->
+    <div class="q-card" data-q="16">
+      <div class="q-header">
+        <span class="q-num">Q16</span>
+        <span class="q-theme">🤝 他者を動かす</span>
+      </div>
+      <div class="q-text">「やり方に不満がある」とき、愚痴で終わらせず行動に変える3ステップは？</div>
+      <button class="reveal-btn" onclick="reveal(this)">答えを見る</button>
+      <div class="answer-area">
+        <div class="answer-label">こたえ</div>
+        <div class="answer-text">
+          <strong>①WHYを理解する</strong>（まず「なぜこうしているのか」を相手に聞く）<br>
+          <strong>②空雨傘で構造化する</strong>（問題と改善案を整理して伝える）<br>
+          <strong>③小さく始める</strong>（いきなり全部変えずに、まず1ヶ月データを取ってみる）
+        </div>
+        <div class="answer-point">愚痴は行動を伴わない。動かなければ何も変わらない！</div>
+      </div>
+      <div class="check-area">
+        <button class="check-btn correct" onclick="check(this, true)">できた！</button>
+        <button class="check-btn wrong" onclick="check(this, false)">もう一回復習する</button>
+      </div>
+    </div>
+
+    <!-- Q17 -->
+    <div class="q-card" data-q="17">
+      <div class="q-header">
+        <span class="q-num">Q17</span>
+        <span class="q-theme">⏩ 前/後ろの行動</span>
+      </div>
+      <div class="q-text">次のケース、チームを「前に進める」行動？「後ろに引っ張る」行動？<br>A. データに基づいてリスクを指摘した<br>B. 他のタスクがあるのに引き受けて遅延した<br>C. 懸念があったけど黙っていてトラブルになった</div>
+      <button class="reveal-btn" onclick="reveal(this)">答えを見る</button>
+      <div class="answer-area">
+        <div class="answer-label">こたえ</div>
+        <div class="answer-text">
+          A. → <strong>前に進める</strong>（データに基づく指摘はチームの判断の質を上げる！）<br><br>
+          B. → <strong>後ろに引っ張る</strong>（引き受ける前に優先順位を確認すべき）<br><br>
+          C. → <strong>後ろに引っ張る</strong>（懸念を共有しないと、チームの判断に必要な情報が欠ける）
+        </div>
+        <div class="answer-point">判定が分かれるケースもある。「前」「後ろ」どちらでも理由が合理的であればOK！</div>
+      </div>
+      <div class="check-area">
+        <button class="check-btn correct" onclick="check(this, true)">できた！</button>
+        <button class="check-btn wrong" onclick="check(this, false)">もう一回復習する</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Result -->
+  <div class="result-area" id="result-area">
+    <div class="result-emoji" id="result-emoji"></div>
+    <div class="result-msg" id="result-msg"></div>
+    <div class="result-sub" id="result-sub"></div>
+    <a href="review.html" class="retry-btn">復習ノートで確認する</a>
+    <button class="retry-btn" onclick="location.reload()" style="margin-left:8px; background:linear-gradient(135deg,#ffab91,#ff7043);">もう一回やる！</button>
+  </div>
+
+  <script>
+    var total = 17;
+    var correctCount = 0;
+    var answeredCount = 0;
+
+    function reveal(btn) {
+      if (btn.classList.contains('revealed')) return;
+      btn.classList.add('revealed');
+      btn.textContent = '答えを表示中';
+      var card = btn.closest('.q-card');
+      card.querySelector('.answer-area').classList.add('show');
+      card.querySelector('.check-area').classList.add('show');
+    }
+
+    function check(btn, isCorrect) {
+      var area = btn.closest('.check-area');
+      if (area.dataset.answered) return;
+      area.dataset.answered = 'true';
+
+      btn.classList.add('active');
+      answeredCount++;
+
+      if (isCorrect) {
+        correctCount++;
+      }
+
+      document.getElementById('correct-count').textContent = correctCount;
+      document.getElementById('score-bar').style.width = (correctCount / total * 100) + '%';
+
+      // Disable both buttons
+      var btns = area.querySelectorAll('.check-btn');
+      btns.forEach(function(b) {
+        if (!b.classList.contains('active')) {
+          b.style.opacity = '0.4';
+          b.style.cursor = 'default';
+        }
+      });
+
+      if (answeredCount === total) {
+        showResult();
+      }
+    }
+
+    function showResult() {
+      var area = document.getElementById('result-area');
+      var emoji = document.getElementById('result-emoji');
+      var msg = document.getElementById('result-msg');
+      var sub = document.getElementById('result-sub');
+
+      var rate = correctCount / total;
+
+      if (rate >= 0.9) {
+        emoji.textContent = '🎉';
+        msg.textContent = correctCount + ' / ' + total + ' 問正解！すごい！';
+        sub.textContent = 'ほぼ完璧！自信を持って大丈夫だよ！';
+      } else if (rate >= 0.7) {
+        emoji.textContent = '✨';
+        msg.textContent = correctCount + ' / ' + total + ' 問正解！いい感じ！';
+        sub.textContent = 'あとちょっと！間違えたところを復習ノートで確認しよう';
+      } else if (rate >= 0.5) {
+        emoji.textContent = '💪';
+        msg.textContent = correctCount + ' / ' + total + ' 問正解！';
+        sub.textContent = '半分以上できてる！苦手なテーマを重点的に復習してみよう';
+      } else {
+        emoji.textContent = '📖';
+        msg.textContent = correctCount + ' / ' + total + ' 問正解';
+        sub.textContent = 'まずは復習ノートでポイントを確認してから、もう一回チャレンジ！';
+      }
+
+      area.classList.add('show');
+      area.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  </script>
+
+</body>
+</html>
