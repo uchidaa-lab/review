@@ -60,57 +60,78 @@
       margin: 0 auto;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 12px;
     }
 
+    /* ── Card (details/summary) ── */
     .card {
       background: rgba(255,255,255,0.85);
       backdrop-filter: blur(8px);
       border-radius: 16px;
-      padding: 24px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.06);
       border: 1px solid rgba(255,255,255,0.9);
       animation: fadeUp 0.4s ease both;
+      overflow: hidden;
     }
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(16px); }
       to { opacity: 1; transform: translateY(0); }
     }
-
-    .card-head {
+    .card > summary {
       display: flex;
       align-items: center;
       gap: 10px;
-      margin-bottom: 14px;
+      padding: 18px 24px;
+      cursor: pointer;
+      list-style: none;
+      user-select: none;
+      transition: background 0.2s;
       flex-wrap: wrap;
     }
+    .card > summary::-webkit-details-marker { display: none; }
+    .card > summary:hover { background: rgba(206,147,216,0.1); }
+    .card[open] > summary { border-bottom: 1px solid rgba(206,147,216,0.2); }
+    .card > summary .card-arrow {
+      font-size: 0.7rem;
+      color: #ab47bc;
+      transition: transform 0.25s;
+      flex-shrink: 0;
+    }
+    .card[open] > summary .card-arrow { transform: rotate(90deg); }
+
     .card-emoji {
-      font-size: 1.6rem;
+      font-size: 1.4rem;
       line-height: 1;
+      flex-shrink: 0;
     }
     .card-title {
-      font-size: 1.1rem;
+      font-size: 1rem;
       font-weight: bold;
       color: #4a148c;
       flex: 1;
     }
-    .card-subtitle {
-      font-size: 0.78rem;
-      color: #9c7db8;
-      width: 100%;
-      margin-top: -4px;
-    }
-
     .difficulty {
       font-size: 0.7rem;
       padding: 3px 10px;
       border-radius: 12px;
       font-weight: bold;
       white-space: nowrap;
+      flex-shrink: 0;
     }
     .diff-hard { background: #ffcdd2; color: #c62828; }
     .diff-medium { background: #fff9c4; color: #f57f17; }
     .diff-easy { background: #c8e6c9; color: #2e7d32; }
+
+    .card-body {
+      padding: 4px 24px 24px;
+      animation: fadeIn 0.3s ease;
+    }
+    .card-subtitle {
+      font-size: 0.78rem;
+      color: #9c7db8;
+      margin-bottom: 12px;
+      display: block;
+    }
 
     .score-bar {
       height: 8px;
@@ -192,6 +213,80 @@
       font-weight: bold;
     }
 
+    /* ── Accordion (deep-dive) ── */
+    .deep-dive {
+      margin-top: 18px;
+      border: none;
+      border-top: 1px dashed #d1c4e9;
+      padding-top: 14px;
+    }
+    .deep-dive summary {
+      font-size: 0.85rem;
+      font-weight: bold;
+      color: #fff;
+      cursor: pointer;
+      padding: 10px 18px;
+      background: linear-gradient(135deg, #ab47bc, #7e57c2);
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(126,87,194,0.25);
+      list-style: none;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .deep-dive summary::-webkit-details-marker { display: none; }
+    .deep-dive summary::before {
+      content: '\25B6\FE0E ';
+      font-size: 0.65rem;
+      margin-right: 4px;
+      display: inline-block;
+      transition: transform 0.2s;
+    }
+    .deep-dive[open] summary::before {
+      transform: rotate(90deg);
+    }
+    .deep-dive summary:hover { background: linear-gradient(135deg, #9c27b0, #673ab7); box-shadow: 0 4px 12px rgba(126,87,194,0.35); transform: translateY(-1px); }
+    .deep-dive-body {
+      margin-top: 10px;
+      padding: 14px 16px;
+      background: linear-gradient(135deg, #f3e5f522, #e8eaf622);
+      border-radius: 10px;
+      border-left: 3px solid #b39ddb;
+      font-size: 0.84rem;
+      line-height: 1.7;
+      color: #555;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .deep-dive-body strong { color: #5e35b1; }
+    .deep-dive-body .dd-heading {
+      font-size: 0.72rem;
+      font-weight: bold;
+      color: #7e57c2;
+      margin: 10px 0 4px;
+      letter-spacing: 0.05em;
+    }
+    .deep-dive-body .dd-heading:first-child { margin-top: 0; }
+    .deep-dive-body .dd-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 6px 0 8px;
+      font-size: 0.82rem;
+    }
+    .deep-dive-body .dd-table th {
+      background: #ede7f6;
+      color: #5e35b1;
+      font-size: 0.72rem;
+      padding: 5px 8px;
+      text-align: left;
+      border-bottom: 2px solid #d1c4e9;
+    }
+    .deep-dive-body .dd-table td {
+      padding: 5px 8px;
+      border-bottom: 1px solid #f3e5f5;
+      vertical-align: top;
+    }
+    .deep-dive-body .dd-table tr:last-child td { border-bottom: none; }
+
     .back-to-top {
       display: block;
       text-align: center;
@@ -205,7 +300,8 @@
     @media (max-width: 600px) {
       body { padding: 20px 10px 60px; }
       .page-header h1 { font-size: 1.5rem; }
-      .card { padding: 18px 16px; }
+      .card > summary { padding: 14px 16px; }
+      .card-body { padding: 4px 16px 18px; }
     }
   </style>
 </head>
@@ -213,536 +309,183 @@
 
   <div class="page-header">
     <h1>効果測定テスト 復習ノート</h1>
-    <p>全17テーマのポイントをぎゅっとまとめたよ！</p>
+    <p>テーマをタップして中身を見よう！</p>
   </div>
 
   <nav class="nav-bar">
-    <a href="review.html" class="current">復習ノート</a>
+    <a href="index.html" class="current">復習ノート</a>
     <a href="quiz.html">クイズに挑戦</a>
-    <a href="index.html">ポートフォリオ</a>
   </nav>
 
   <div class="cards">
 
     <!-- 第1問 研修の根本 -->
-    <div class="card">
-      <div class="card-head">
+    <details class="card">
+      <summary>
+        <span class="card-arrow">&#9654;&#65038;</span>
         <span class="card-emoji">🏠</span>
         <span class="card-title">第1問 研修の根本</span>
-        <span class="difficulty diff-medium">みんなの得点率 54%</span>
+        <span class="difficulty diff-medium">54%</span>
+      </summary>
+      <div class="card-body">
         <span class="card-subtitle">仕事の定義・信頼残高・目指す人物像</span>
+        <div class="score-label">みんなの正答率</div>
+        <div class="score-bar"><div class="score-bar-fill" style="width:54%; background:linear-gradient(90deg,#ffb74d,#ffa726)"></div></div>
+        <span class="section-label">覚えるポイント</span>
+        <ul>
+          <li><strong>仕事とは？</strong> → ステークホルダーを安心させること</li>
+          <li><strong>信頼残高</strong> → 行動様式の積み重ねで決まる信頼の蓄積。失うのは一瞬（バケツの穴）</li>
+          <li><strong>目指す人物像</strong> → 「5年後に組織を牽引する、異常な情熱を持つリーダー」の<strong>4要素</strong>を正確に！</li>
+        </ul>
+        <span class="section-label">よくあるミス</span>
+        <ul>
+          <li>人物像で「異常な情熱を持つリーダー」は書けるけど「5年後」「組織を牽引する」が抜けがち</li>
+        </ul>
+        <div class="keyword-chips">
+          <span class="keyword-chip">ステークホルダー</span>
+          <span class="keyword-chip">信頼残高</span>
+          <span class="keyword-chip">バケツの穴</span>
+          <span class="keyword-chip">5年後</span>
+        </div>
+        <details class="deep-dive">
+          <summary>研修ノートから深掘り</summary>
+          <div class="deep-dive-body">
+            <div class="dd-heading">リスペクトの2水準</div>
+            <table class="dd-table">
+              <tr><th>水準</th><th>定義</th><th>具体的には</th></tr>
+              <tr><td><strong>下限</strong></td><td>相手の価値を下げない</td><td>時間を奪わない、手戻りを出さない、不安にさせない</td></tr>
+              <tr><td><strong>上限</strong></td><td>相手の価値を引き上げる</td><td>下限は通過点。引き上げる努力で代替不可能な存在に</td></tr>
+            </table>
+            <div class="dd-heading">大谷翔平の事例</div>
+            関わるすべての人の価値を下げない姿勢を貫いた結果、世界中から信頼残高を得て、史上最高額の契約に。<strong>信頼残高が先、金銭的価値は後。この順番は絶対に逆にならない。</strong>
+          </div>
+        </details>
       </div>
-      <div class="score-label">みんなの正答率</div>
-      <div class="score-bar"><div class="score-bar-fill" style="width:54%; background:linear-gradient(90deg,#ffb74d,#ffa726)"></div></div>
-
-      <span class="section-label">覚えるポイント</span>
-      <ul>
-        <li><strong>仕事とは？</strong> → ステークホルダーを安心させること</li>
-        <li><strong>信頼残高</strong> → 行動様式の積み重ねで決まる信頼の蓄積。失うのは一瞬（バケツの穴）</li>
-        <li><strong>目指す人物像</strong> → 「5年後に組織を牽引する、異常な情熱を持つリーダー」の<strong>4要素</strong>を正確に！</li>
-      </ul>
-
-      <span class="section-label">よくあるミス</span>
-      <ul>
-        <li>人物像で「異常な情熱を持つリーダー」は書けるけど「5年後」「組織を牽引する」が抜けがち</li>
-      </ul>
-
-      <div class="keyword-chips">
-        <span class="keyword-chip">ステークホルダー</span>
-        <span class="keyword-chip">信頼残高</span>
-        <span class="keyword-chip">バケツの穴</span>
-        <span class="keyword-chip">5年後</span>
-      </div>
-    </div>
+    </details>
 
     <!-- 第2問 6動詞 -->
-    <div class="card">
-      <div class="card-head">
+    <details class="card">
+      <summary>
+        <span class="card-arrow">&#9654;&#65038;</span>
         <span class="card-emoji">💪</span>
         <span class="card-title">第2問 6動詞</span>
-        <span class="difficulty diff-easy">みんなの得点率 61%</span>
+        <span class="difficulty diff-easy">61%</span>
+      </summary>
+      <div class="card-body">
         <span class="card-subtitle">ビジネスの基本動作を6つの動詞で定義</span>
+        <div class="score-label">みんなの正答率</div>
+        <div class="score-bar"><div class="score-bar-fill" style="width:61%; background:linear-gradient(90deg,#81c784,#66bb6a)"></div></div>
+        <span class="section-label">6つの動詞と定義</span>
+        <ul>
+          <li><strong>学ぶ</strong> → 教わったことを翌日、自力で100%再現できること</li>
+          <li><strong>聴く</strong> → 相手の意図を正確に受け取り、解釈のズレをなくすこと</li>
+          <li><strong>読む</strong> → 読んだ内容を、その場で他者に説明できること</li>
+          <li><strong>書く</strong> → 読み手が最小限の時間で理解し、次の行動に移せる文章を書くこと</li>
+          <li><strong>話す</strong> → 聞き手が定義され、意図した効果（行動変容等）を達成すること</li>
+          <li><strong>巻き込む</strong> → 必要な人・情報・リソースを、適切な順序・タイミングで能動的に引き込むこと</li>
+        </ul>
+        <span class="section-label">よくあるミス</span>
+        <ul>
+          <li>「学ぶ」の定義で「翌日100%再現」のキーワードが出ない人が多い</li>
+          <li>理由を聞かれたら「バケツの穴」と「アクティブリコール」に言及すると満点！</li>
+        </ul>
+        <div class="keyword-chips">
+          <span class="keyword-chip">100%再現</span>
+          <span class="keyword-chip">バケツの穴</span>
+          <span class="keyword-chip">アクティブリコール</span>
+        </div>
+        <details class="deep-dive">
+          <summary>研修ノートから深掘り</summary>
+          <div class="deep-dive-body">
+            <div class="dd-heading">各動詞のリスペクト下限 / 上限</div>
+            <table class="dd-table">
+              <tr><th>動詞</th><th>下限（まず到達）</th><th>上限（目指す先）</th></tr>
+              <tr><td><strong>学ぶ</strong></td><td>同じ説明を二度させない</td><td>教えた人の投資にリターンを返す</td></tr>
+              <tr><td><strong>読む</strong></td><td>的外れな質問で書き手の時間を奪わない</td><td>読んだ内容を発展させる</td></tr>
+              <tr><td><strong>聴く</strong></td><td>聞き直し・やり直しを出さない</td><td>「この人に話すと整理される」と思わせる</td></tr>
+              <tr><td><strong>書く</strong></td><td>読み手の時間を奪わない</td><td>読み手の判断力・行動力を引き上げる</td></tr>
+              <tr><td><strong>話す</strong></td><td>「で、何が言いたいの？」を出さない</td><td>聞き手にとって「体験」になる</td></tr>
+              <tr><td><strong>巻き込む</strong></td><td>一人で抱えて全員の時間を爆発させない</td><td>巻き込まれた全員が「参加してよかった」</td></tr>
+            </table>
+            6動詞はすべて<strong>リスペクトの具体的な実行形態</strong>。正しく実行すれば自動的に信頼残高が積み上がる。
+          </div>
+        </details>
       </div>
-      <div class="score-label">みんなの正答率</div>
-      <div class="score-bar"><div class="score-bar-fill" style="width:61%; background:linear-gradient(90deg,#81c784,#66bb6a)"></div></div>
-
-      <span class="section-label">6つの動詞と定義</span>
-      <ul>
-        <li><strong>学ぶ</strong> → 教わったことを翌日、自力で100%再現できること</li>
-        <li><strong>聴く</strong> → 相手の意図を正確に受け取り、解釈のズレをなくすこと</li>
-        <li><strong>読む</strong> → 読んだ内容を、その場で他者に説明できること</li>
-        <li><strong>書く</strong> → 読み手が最小限の時間で理解し、次の行動に移せる文章を書くこと</li>
-        <li><strong>話す</strong> → 聞き手が定義され、意図した効果（行動変容等）を達成すること</li>
-        <li><strong>巻き込む</strong> → 必要な人・情報・リソースを、適切な順序・タイミングで能動的に引き込むこと</li>
-      </ul>
-
-      <span class="section-label">よくあるミス</span>
-      <ul>
-        <li>「学ぶ」の定義で「翌日100%再現」のキーワードが出ない人が多い</li>
-        <li>理由を聞かれたら「バケツの穴」と「アクティブリコール」に言及すると満点！</li>
-      </ul>
-
-      <div class="keyword-chips">
-        <span class="keyword-chip">100%再現</span>
-        <span class="keyword-chip">バケツの穴</span>
-        <span class="keyword-chip">アクティブリコール</span>
-      </div>
-    </div>
+    </details>
 
     <!-- 第3問 空・雨・傘 -->
-    <div class="card">
-      <div class="card-head">
+    <details class="card">
+      <summary>
+        <span class="card-arrow">&#9654;&#65038;</span>
         <span class="card-emoji">☂️</span>
         <span class="card-title">第3問 空・雨・傘</span>
-        <span class="difficulty diff-medium">みんなの得点率 50%</span>
+        <span class="difficulty diff-medium">50%</span>
+      </summary>
+      <div class="card-body">
         <span class="card-subtitle">伝え方の3層構造で相手の思考コストを下げる</span>
+        <div class="score-label">みんなの正答率</div>
+        <div class="score-bar"><div class="score-bar-fill" style="width:50%; background:linear-gradient(90deg,#ffb74d,#ffa726)"></div></div>
+        <span class="section-label">覚えるポイント</span>
+        <ul>
+          <li><strong>空</strong> = 事実（数字やデータそのもの）</li>
+          <li><strong>雨</strong> = 解釈（事実から読み取れること）</li>
+          <li><strong>傘</strong> = 提案（じゃあどうする？）← 「何を」「いつまでに」を入れる！</li>
+          <li><strong>なぜ分ける？</strong> → 上司の思考コストを下げて、信頼残高を貯めるため</li>
+        </ul>
+        <span class="section-label">お手本回答</span>
+        <div class="model-answer">
+          「A社の今月のシステム利用率が先月比で<strong>10%下がっています</strong>（空）。社内で<strong>担当者が変わったことが原因</strong>と考えられます（雨）。解約を防ぐために<strong>オンボーディングの設定を今週中に行う</strong>のはいかがでしょうか？（傘）」
+        </div>
+        <div class="keyword-chips">
+          <span class="keyword-chip">事実 / 解釈 / 提案</span>
+          <span class="keyword-chip">思考コストを下げる</span>
+          <span class="keyword-chip">信頼残高</span>
+        </div>
+        <details class="deep-dive">
+          <summary>研修ノートから深掘り</summary>
+          <div class="deep-dive-body">
+            <div class="dd-heading">3つの失敗パターン</div>
+            <table class="dd-table">
+              <tr><th>パターン</th><th>例</th><th>上司の反応</th></tr>
+              <tr><td><strong>混在型</strong></td><td>「売上が下がっていてヤバいので何かしたいです」</td><td>「何が事実で何が感想？」2往復ロス</td></tr>
+              <tr><td><strong>事実だけ型</strong></td><td>「A社から連絡がありました」（以上）</td><td>「で？」So What力ゼロ</td></tr>
+              <tr><td><strong>傘だけ型</strong></td><td>「値引きすべきだと思います」</td><td>「根拠は？」説得力ゼロ</td></tr>
+            </table>
+            <div class="dd-heading">各層の「質」にも注意</div>
+            構造が合っていても中身が誤ると報告の質は下がる。<strong>空</strong>に推測が混入していないか？ <strong>雨</strong>で根拠なく決めつけていないか？ <strong>傘</strong>で解釈からロジックが飛躍していないか？ 分離と質、両方クリアして初めて良い報告。
+          </div>
+        </details>
       </div>
-      <div class="score-label">みんなの正答率</div>
-      <div class="score-bar"><div class="score-bar-fill" style="width:50%; background:linear-gradient(90deg,#ffb74d,#ffa726)"></div></div>
+    </details>
 
-      <span class="section-label">覚えるポイント</span>
-      <ul>
-        <li><strong>空</strong> = 事実（数字やデータそのもの）</li>
-        <li><strong>雨</strong> = 解釈（事実から読み取れること）</li>
-        <li><strong>傘</strong> = 提案（じゃあどうする？）← 「何を」「いつまでに」を入れる！</li>
-        <li><strong>なぜ分ける？</strong> → 上司の思考コストを下げて、信頼残高を貯めるため</li>
-      </ul>
+    <!-- 第4問～第17問: 同じ構造で続く -->
+    <details class="card"><summary><span class="card-arrow">&#9654;&#65038;</span><span class="card-emoji">🔍</span><span class="card-title">第4問 具体と抽象</span><span class="difficulty diff-medium">54%</span></summary><div class="card-body"><span class="card-subtitle">バラバラの出来事から共通の根本課題を見つける</span><div class="score-label">みんなの正答率</div><div class="score-bar"><div class="score-bar-fill" style="width:54%; background:linear-gradient(90deg,#ffb74d,#ffa726)"></div></div><span class="section-label">覚えるポイント</span><ul><li>複数の出来事に共通する<strong>根本課題</strong>を「動ける粒度」で言語化する</li><li>具体的な行動は「<strong>誰が・いつまでに・何を</strong>」を明確に！</li><li>「意識する」「気をつける」はNG → 具体的なアクションに落とす</li></ul><span class="section-label">お手本回答（行動例）</span><div class="model-answer">・今日の昼休みにSlackの通知設定を見直し、メンションは必ず音が鳴るようにする<br>・明日から全ての会議の冒頭で、ノートを開いて決定事項を1行ずつ記録する<br>・今週金曜17:00までに、全タスクの期限・Done条件をNotionにリスト化する</div><div class="keyword-chips"><span class="keyword-chip">根本課題</span><span class="keyword-chip">動ける粒度</span><span class="keyword-chip">誰が・いつまでに・何を</span></div><details class="deep-dive"><summary>研修ノートから深掘り</summary><div class="deep-dive-body"><div class="dd-heading">「抽象→具体」の2段階を意識</div><strong>1段階目</strong>：バラバラの事象から共通する根本課題を抽出する（抽象化）<br><strong>2段階目</strong>：その課題を「誰が・いつまでに・何を」の動ける粒度に落とす（具体化）<br><br>「意識する」「気をつける」がNGなのは、<strong>行動が定義されていないから</strong>。誰が見ても同じ行動が取れる記述こそが「具体的」。</div></details></div></details>
 
-      <span class="section-label">お手本回答</span>
-      <div class="model-answer">
-        「A社の今月のシステム利用率が先月比で<strong>10%下がっています</strong>（空）。社内で<strong>担当者が変わったことが原因</strong>と考えられます（雨）。解約を防ぐために<strong>オンボーディングの設定を今週中に行う</strong>のはいかがでしょうか？（傘）」
-      </div>
+    <details class="card"><summary><span class="card-arrow">&#9654;&#65038;</span><span class="card-emoji">✍️</span><span class="card-title">第5問 簡潔にロジカル</span><span class="difficulty diff-medium">54%</span></summary><div class="card-body"><span class="card-subtitle">PREP法と4原則で伝わる文章を書く</span><div class="score-label">みんなの正答率</div><div class="score-bar"><div class="score-bar-fill" style="width:54%; background:linear-gradient(90deg,#ffb74d,#ffa726)"></div></div><span class="section-label">覚えるポイント</span><ul><li><strong>PREP法</strong> → P（結論）→ R（理由）→ E（具体例）→ P（再結論）</li><li><strong>4原則</strong> → 1文1メッセージ / 接続詞を8割削る / 修飾語を削る / 能動態で書く</li><li>圧縮する理由 → 上司の時間を奪わないため＆後回しにされないため</li></ul><div class="keyword-chips"><span class="keyword-chip">PREP法</span><span class="keyword-chip">1文1メッセージ</span><span class="keyword-chip">接続詞8割カット</span><span class="keyword-chip">能動態</span></div><details class="deep-dive"><summary>研修ノートから深掘り</summary><div class="deep-dive-body"><div class="dd-heading">6動詞「書く」の基準で考える</div>「書く」の定義は<strong>読み手が最小時間で理解し、次の行動に移せる文章</strong>。つまりPREP法と4原則は「書く」のリスペクト下限（読み手の時間を奪わない）を満たすためのツール。<br><br><strong>上司は1日に何十通もメッセージを読む。</strong>あなたの文章が冗長だと後回しにされる＝信頼残高を引き出す行為。圧縮された文章＝信頼残高を貯める行為。</div></details></div></details>
 
-      <div class="keyword-chips">
-        <span class="keyword-chip">事実 / 解釈 / 提案</span>
-        <span class="keyword-chip">思考コストを下げる</span>
-        <span class="keyword-chip">信頼残高</span>
-      </div>
-    </div>
+    <details class="card"><summary><span class="card-arrow">&#9654;&#65038;</span><span class="card-emoji">✅</span><span class="card-title">第6問 アクション返答</span><span class="difficulty diff-medium">50%</span></summary><div class="card-body"><span class="card-subtitle">「了解です」で終わらせない、次の行動を伝える返事</span><div class="score-label">みんなの正答率</div><div class="score-bar"><div class="score-bar-fill" style="width:50%; background:linear-gradient(90deg,#ffb74d,#ffa726)"></div></div><span class="section-label">覚えるポイント</span><ul><li>返事には<strong>3要素</strong>が必要 → ①何の件か ②承知 ③何をいつまでにするか</li><li>「承知しました」だけ → 上司は「いつ届くの？」と追加確認が必要になっちゃう</li></ul><span class="section-label">お手本回答</span><div class="model-answer">「アンケート集計データの件、<strong>承知しました</strong>。<strong>本日18時までに</strong>集計して<strong>お送りします</strong>。」</div><div class="keyword-chips"><span class="keyword-chip">何の件か</span><span class="keyword-chip">承知</span><span class="keyword-chip">何をいつまでに</span></div><details class="deep-dive"><summary>研修ノートから深掘り</summary><div class="deep-dive-body"><div class="dd-heading">「承知しました」だけが信頼残高を削る理由</div>上司は返事を受け取った後、<strong>「いつ届くか」「本当に伝わったか」</strong>を頭の中で気にし続ける。3要素を返すことで上司の脳内の「未解決タスク」を消してあげられる＝<strong>思考コストを下げる＝信頼残高を貯める</strong>。アクション返答は報連相の最小単位。</div></details></div></details>
 
-    <!-- 第4問 具体と抽象 -->
-    <div class="card">
-      <div class="card-head">
-        <span class="card-emoji">🔍</span>
-        <span class="card-title">第4問 具体と抽象</span>
-        <span class="difficulty diff-medium">みんなの得点率 54%</span>
-        <span class="card-subtitle">バラバラの出来事から共通の根本課題を見つける</span>
-      </div>
-      <div class="score-label">みんなの正答率</div>
-      <div class="score-bar"><div class="score-bar-fill" style="width:54%; background:linear-gradient(90deg,#ffb74d,#ffa726)"></div></div>
+    <details class="card"><summary><span class="card-arrow">&#9654;&#65038;</span><span class="card-emoji">📐</span><span class="card-title">第7問 20%ルール</span><span class="difficulty diff-medium">52%</span></summary><div class="card-body"><span class="card-subtitle">完成前に方向性を確認して手戻りを防ぐ</span><div class="score-label">みんなの正答率</div><div class="score-bar"><div class="score-bar-fill" style="width:52%; background:linear-gradient(90deg,#ffb74d,#ffa726)"></div></div><span class="section-label">覚えるポイント</span><ul><li><strong>骨子の3要素</strong> → タイトル・結論・構成</li><li><strong>3ステップ</strong> → ①骨子を先に作る → ②方向性確認を依頼 → ③合意後に作り込む</li><li>100%作ってから見せると、ズレてたとき全部やり直し…20%の段階で見せよう！</li></ul><div class="keyword-chips"><span class="keyword-chip">タイトル・結論・構成</span><span class="keyword-chip">骨子で方向性確認</span><span class="keyword-chip">手戻り防止</span></div><details class="deep-dive"><summary>研修ノートから深掘り</summary><div class="deep-dive-body"><div class="dd-heading">20%の具体的な目安</div>「20%って何？」と迷ったら：<strong>計画を立てたら相談</strong>、<strong>目次を書いたら相談</strong>。骨子の3要素（タイトル・結論・構成）が揃った段階が20%。<br><br>100%作り込んでからの手戻りは、あなたの時間だけでなく<strong>上司のレビュー時間も爆発的に奪う</strong>。20%確認は信頼残高を守る防衛線。</div></details></div></details>
 
-      <span class="section-label">覚えるポイント</span>
-      <ul>
-        <li>複数の出来事に共通する<strong>根本課題</strong>を「動ける粒度」で言語化する</li>
-        <li>具体的な行動は「<strong>誰が・いつまでに・何を</strong>」を明確に！</li>
-        <li>「意識する」「気をつける」はNG → 具体的なアクションに落とす</li>
-      </ul>
+    <details class="card"><summary><span class="card-arrow">&#9654;&#65038;</span><span class="card-emoji">🤔</span><span class="card-title">第8問 仮説付き質問</span><span class="difficulty diff-medium">52%</span></summary><div class="card-body"><span class="card-subtitle">「どうしたらいいですか？」を卒業する3つの型</span><div class="score-label">みんなの正答率</div><div class="score-bar"><div class="score-bar-fill" style="width:52%; background:linear-gradient(90deg,#ffb74d,#ffa726)"></div></div><span class="section-label">3つの型</span><ul><li><strong>検証型</strong> →「私はAだと思っているのですが、合っていますか？」</li><li><strong>比較提示型</strong> →「BとCで迷っています。理由は〇〇なのでBが良いと考えますが…」</li><li><strong>根拠参照型</strong> →「資料の△△に基づき、今回も適用可能と考えますが？」</li></ul><span class="section-label">覚えるポイント</span><ul><li>自分の仮説を添えて、相手が<strong>Yes/No で答えられる形</strong>にする → 相手の負荷が激減！</li></ul><div class="keyword-chips"><span class="keyword-chip">検証型</span><span class="keyword-chip">比較提示型</span><span class="keyword-chip">根拠参照型</span></div><details class="deep-dive"><summary>研修ノートから深掘り</summary><div class="deep-dive-body"><div class="dd-heading">報連相の「相談」との接続</div>「どうしたらいいですか？」は上司に思考の責任を丸投げしている状態。仮説付き質問は<strong>報連相の「相談」のプロ版</strong>。<br><br>ただし、マジでわからない時は意地を張らない。<strong>「ここまで調べましたが、ここから先がわかりません。ヒントをください」</strong>と自分の現在地を明確にして即座に相談すればOK。</div></details></div></details>
 
-      <span class="section-label">お手本回答（行動例）</span>
-      <div class="model-answer">
-        ・今日の昼休みにSlackの通知設定を見直し、メンションは必ず音が鳴るようにする<br>
-        ・明日から全ての会議の冒頭で、ノートを開いて決定事項を1行ずつ記録する<br>
-        ・今週金曜17:00までに、全タスクの期限・Done条件をNotionにリスト化する
-      </div>
+    <details class="card"><summary><span class="card-arrow">&#9654;&#65038;</span><span class="card-emoji">🙏</span><span class="card-title">第9問 相手の立場を想像した依頼</span><span class="difficulty diff-hard">34%</span></summary><div class="card-body"><span class="card-subtitle">お願いするとき、相手の気持ちまで考える</span><div class="score-label">みんなの正答率</div><div class="score-bar"><div class="score-bar-fill" style="width:34%; background:linear-gradient(90deg,#ef9a9a,#e57373)"></div></div><span class="section-label">依頼文に必要な4要素</span><ul><li><strong>専門性への敬意</strong> →「なぜあなたに頼むのか」の理由を伝える</li><li><strong>主導権の譲渡</strong> → 日程の調整余地を持たせる</li><li><strong>断る余地</strong> →「繁忙期が終わってからでも構いません」など</li><li><strong>感謝の明文化</strong> → ちゃんとお礼を言葉にする</li></ul><span class="section-label">なぜ雑な依頼はダメ？</span><ul><li>相手の多忙さへの配慮がなく、何を教えればいいか不明確で、負担を丸投げしてるから</li></ul><div class="keyword-chips"><span class="keyword-chip">敬意</span><span class="keyword-chip">主導権の譲渡</span><span class="keyword-chip">断る余地</span><span class="keyword-chip">感謝</span></div><details class="deep-dive"><summary>研修ノートから深掘り</summary><div class="deep-dive-body"><div class="dd-heading">リスペクトの実践そのもの</div>依頼の4要素は<strong>リスペクト＝相手の価値を下げない</strong>の直接的な実践。雑な依頼は相手の時間・専門性の価値を下げる行為であり、信頼残高を大きく引き出してしまう。<br><br>特に<strong>「断る余地」</strong>を忘れがち。これがないと「やってくれて当然」という姿勢に見え、相手の主体性を奪ってしまう。</div></details></div></details>
 
-      <div class="keyword-chips">
-        <span class="keyword-chip">根本課題</span>
-        <span class="keyword-chip">動ける粒度</span>
-        <span class="keyword-chip">誰が・いつまでに・何を</span>
-      </div>
-    </div>
+    <details class="card"><summary><span class="card-arrow">&#9654;&#65038;</span><span class="card-emoji">📣</span><span class="card-title">第10問 報連相の技術</span><span class="difficulty diff-medium">48%</span></summary><div class="card-body"><span class="card-subtitle">第一声で種別宣言、丸投げ相談はNG</span><div class="score-label">みんなの正答率</div><div class="score-bar"><div class="score-bar-fill" style="width:48%; background:linear-gradient(90deg,#ffb74d,#ffa726)"></div></div><span class="section-label">覚えるポイント</span><ul><li><strong>第一声</strong> → 「報告/連絡/相談」のどれかを宣言する！</li><li><strong>NG</strong> → 丸投げ相談（「どうしたらいいですか？」）</li><li><strong>理想の3要素</strong> → ①種別宣言 ②結論ファースト ③自分なりの仮説を添える</li></ul><span class="section-label">お手本回答</span><div class="model-answer">「K社に関する資料作成の<strong>ご相談</strong>です。データの場所を聞いたものの不明で、<strong>代わりにこの資料を使おうと思っている</strong>のですが、これでよろしいですか？」</div><div class="keyword-chips"><span class="keyword-chip">種別宣言</span><span class="keyword-chip">結論ファースト</span><span class="keyword-chip">仮説を添える</span></div><details class="deep-dive"><summary>研修ノートから深掘り</summary><div class="deep-dive-body"><div class="dd-heading">報連相の遅れ＝お客様への迷惑</div>社内で完結する仕事は一つもない。あなたが抱え込んだ分の「しわ寄せ」は、最終的に<strong>納期の遅れやクオリティの低下</strong>としてお客様に届く。報連相を怠る＝TOKIUMとお客様の信頼残高を毀損する行為。<div class="dd-heading">「相談Index化」のススメ</div>「自分で即決」「事後報告でOK」「即相談」の基準を自分なりにリスト化しておくと、<strong>迷う時間がゼロになり行動スピードが劇的に上がる。</strong></div></details></div></details>
 
-    <!-- 第5問 簡潔にロジカル -->
-    <div class="card">
-      <div class="card-head">
-        <span class="card-emoji">✍️</span>
-        <span class="card-title">第5問 簡潔にロジカル</span>
-        <span class="difficulty diff-medium">みんなの得点率 54%</span>
-        <span class="card-subtitle">PREP法と4原則で伝わる文章を書く</span>
-      </div>
-      <div class="score-label">みんなの正答率</div>
-      <div class="score-bar"><div class="score-bar-fill" style="width:54%; background:linear-gradient(90deg,#ffb74d,#ffa726)"></div></div>
+    <details class="card"><summary><span class="card-arrow">&#9654;&#65038;</span><span class="card-emoji">🚨</span><span class="card-title">第11問 バッドニュース15分ルール</span><span class="difficulty diff-hard">26%</span></summary><div class="card-body"><span class="card-subtitle">一番みんなが苦戦したテーマ！テンプレを覚えよう</span><div class="score-label">みんなの正答率</div><div class="score-bar"><div class="score-bar-fill" style="width:26%; background:linear-gradient(90deg,#ef9a9a,#e57373)"></div></div><span class="section-label">一次報告テンプレートの4要素</span><ul><li><strong>①状況</strong> → 今何が起きているか</li><li><strong>②原因</strong> → なぜ起きたか（わかる範囲で）</li><li><strong>③経過</strong> → これまでの対応</li><li><strong>④対応案</strong> → これからどうするか</li></ul><span class="section-label">覚えるポイント</span><ul><li>冒頭で「バッドニュースの報告です」と宣言する</li><li><strong>15分以内</strong>に報告 → 早く伝えるほど取れる対処の選択肢が広がる！</li><li>「すぐ報告する」だけじゃなく、4要素のテンプレートで伝えるのが大事</li></ul><div class="keyword-chips"><span class="keyword-chip">状況</span><span class="keyword-chip">原因</span><span class="keyword-chip">経過</span><span class="keyword-chip">対応案</span><span class="keyword-chip">15分以内</span></div><details class="deep-dive"><summary>研修ノートから深掘り</summary><div class="deep-dive-body"><div class="dd-heading">絶対にやってはいけないNG行動（沈黙の罠）</div><table class="dd-table"><tr><th>NG行動</th><th>なぜダメか</th></tr><tr><td>「自分でなんとかしよう」と長時間抱え込む</td><td>プライドより顧客への価値提供が優先</td></tr><tr><td>「怒られたくない」と黙秘する</td><td>上司はトラブル解決が仕事。黙秘が一番困る</td></tr><tr><td>問題が大きくなってから慌てて報告</td><td><strong>ボヤのうちならコップ一杯の水で消せるが、炎上したら消防車が必要</strong></td></tr></table><div class="dd-heading">完璧な対応策は「不要」</div>一次報告で完璧な解決策を準備する必要はない。分からないことがあってもOK。理想は<strong>5分以内</strong>の第一報。15分は「最低ここまでには報告しろ」のデッドライン。</div></details></div></details>
 
-      <span class="section-label">覚えるポイント</span>
-      <ul>
-        <li><strong>PREP法</strong> → P（結論）→ R（理由）→ E（具体例）→ P（再結論）</li>
-        <li><strong>4原則</strong> → 1文1メッセージ / 接続詞を8割削る / 修飾語を削る / 能動態で書く</li>
-        <li>圧縮する理由 → 上司の時間を奪わないため＆後回しにされないため</li>
-      </ul>
+    <details class="card"><summary><span class="card-arrow">&#9654;&#65038;</span><span class="card-emoji">🎯</span><span class="card-title">第12問 ネクストアクション</span><span class="difficulty diff-medium">48%</span></summary><div class="card-body"><span class="card-subtitle">曖昧な「やります」を具体的なアクションに変える</span><div class="score-label">みんなの正答率</div><div class="score-bar"><div class="score-bar-fill" style="width:48%; background:linear-gradient(90deg,#ffb74d,#ffa726)"></div></div><span class="section-label">NAの4要素</span><ul><li><strong>①Who</strong> → 誰が</li><li><strong>②When</strong> → いつまでに</li><li><strong>③What</strong> → 何を</li><li><strong>④Done条件</strong> → 何をもって完了とするか</li></ul><span class="section-label">お手本回答</span><div class="model-answer">NG:「次回までに進捗共有」<br>OK:「<strong>Mさん</strong>が<strong>4/15 17:00まで</strong>に<strong>デザイン案をSlackに投稿</strong>し、<strong>メンバー全員からOKを得る</strong>」</div><div class="keyword-chips"><span class="keyword-chip">Who</span><span class="keyword-chip">When</span><span class="keyword-chip">What</span><span class="keyword-chip">Done条件</span></div><details class="deep-dive"><summary>研修ノートから深掘り</summary><div class="deep-dive-body"><div class="dd-heading">曖昧な動詞 vs 具体的な動詞</div><table class="dd-table"><tr><th>NG（曖昧）</th><th>OK（具体的）</th></tr><tr><td>頑張る</td><td>○件架電する</td></tr><tr><td>検討する</td><td>△時間でドラフトを出す</td></tr><tr><td>しっかりやる</td><td>毎日□時までに確認する</td></tr></table><strong>「誰が聞いてもわかる・認識齟齬が起こらない」動詞を使う</strong>のがルール。Done条件がないNAは「やったかどうか」の判定すらできない。</div></details></div></details>
 
-      <div class="keyword-chips">
-        <span class="keyword-chip">PREP法</span>
-        <span class="keyword-chip">1文1メッセージ</span>
-        <span class="keyword-chip">接続詞8割カット</span>
-        <span class="keyword-chip">能動態</span>
-      </div>
-    </div>
+    <details class="card"><summary><span class="card-arrow">&#9654;&#65038;</span><span class="card-emoji">🪞</span><span class="card-title">第13問 振り返りの技術</span><span class="difficulty diff-hard">36%</span></summary><div class="card-body"><span class="card-subtitle">「頑張ります」はNG！原因を分解して具体トライへ</span><div class="score-label">みんなの正答率</div><div class="score-bar"><div class="score-bar-fill" style="width:36%; background:linear-gradient(90deg,#ef9a9a,#e57373)"></div></div><span class="section-label">振り返りの4要素</span><ul><li><strong>①問題点指摘</strong> → 何がうまくいかなかったか</li><li><strong>②Why分析</strong> → なぜうまくいかなかったか（因果連鎖）</li><li><strong>③因数分解</strong> → 量の問題か質の問題か</li><li><strong>④具体トライ</strong> → 来週何をどうするか</li></ul><span class="section-label">覚えるポイント</span><ul><li>「頑張る」「しっかり」「気をつける」は<strong>NGワード</strong>！ → 原因が特定できず同じ失敗を繰り返す</li></ul><div class="keyword-chips"><span class="keyword-chip">問題点指摘</span><span class="keyword-chip">Why分析</span><span class="keyword-chip">因数分解</span><span class="keyword-chip">具体トライ</span></div><details class="deep-dive"><summary>研修ノートから深掘り</summary><div class="deep-dive-body"><div class="dd-heading">コルブの経験学習サイクル</div><strong>具体的経験 → 内省・反省 → 概念化・抽象化 → 能動的実験</strong> の4ステップ。経験を「消費」で終わらせるか「蓄積」にするかは、振り返りの有無で決まる。<div class="dd-heading">成果の因数分解</div><strong>成果 ＝ 量 × 質</strong><br>架電数（量）は十分だけどアポが取れない → 質の問題。まずどちらに課題があるかを切り分けないと、的外れなトライになる。<div class="dd-heading">Why分析のコツ</div>最低<strong>3回「なぜ？」を繰り返す</strong>と根本原因が見えてくる。1回目のWhyで出た答えは表面的なことが多い。</div></details></div></details>
 
-    <!-- 第6問 アクション返答 -->
-    <div class="card">
-      <div class="card-head">
-        <span class="card-emoji">✅</span>
-        <span class="card-title">第6問 アクション返答</span>
-        <span class="difficulty diff-medium">みんなの得点率 50%</span>
-        <span class="card-subtitle">「了解です」で終わらせない、次の行動を伝える返事</span>
-      </div>
-      <div class="score-label">みんなの正答率</div>
-      <div class="score-bar"><div class="score-bar-fill" style="width:50%; background:linear-gradient(90deg,#ffb74d,#ffa726)"></div></div>
+    <details class="card"><summary><span class="card-arrow">&#9654;&#65038;</span><span class="card-emoji">🚀</span><span class="card-title">第14問 「新卒」を脱ぎ捨てる</span><span class="difficulty diff-hard">38%</span></summary><div class="card-body"><span class="card-subtitle">受け身を卒業！自分から動き出す</span><div class="score-label">みんなの正答率</div><div class="score-bar"><div class="score-bar-fill" style="width:38%; background:linear-gradient(90deg,#ef9a9a,#e57373)"></div></div><span class="section-label">覚えるポイント</span><ul><li>「他責思考はダメ」だけじゃ足りない → <strong>TOKIUMの組織特性</strong>に触れよう</li><li>TOKIUMは「<strong>スピード100で走りながら整える</strong>」組織</li><li><strong>不確実な環境で自分から動き出す力</strong>が求められる</li></ul><span class="section-label">お手本回答</span><div class="model-answer">「まず動き出し、やりながら整えていくことが必要なため、隣の人を見て動くのでは時すでに遅し。」<br>→ 「走りながら整える」と「不確実な環境で動く」の2つに触れた回答！</div><div class="keyword-chips"><span class="keyword-chip">走りながら整える</span><span class="keyword-chip">不確実な環境</span><span class="keyword-chip">自分から動く</span></div><details class="deep-dive"><summary>研修ノートから深掘り</summary><div class="deep-dive-body"><div class="dd-heading">研修全体のテーマと接続</div>研修の位置づけは<strong>「5年後の部長の最初の2か月」</strong>。サステナブルな成長の「型」を自分の生活にインストールする期間。<br><br>骨格（信頼残高→リスペクト→6動詞）なしに肉付けだけ教えると「ルール暗記」で終わる。骨格が入っていれば<strong>「なぜこのルールがあるのか」を自力で導出できる</strong>。</div></details></div></details>
 
-      <span class="section-label">覚えるポイント</span>
-      <ul>
-        <li>返事には<strong>3要素</strong>が必要 → ①何の件か ②承知 ③何をいつまでにするか</li>
-        <li>「承知しました」だけ → 上司は「いつ届くの？」と追加確認が必要になっちゃう</li>
-      </ul>
+    <details class="card"><summary><span class="card-arrow">&#9654;&#65038;</span><span class="card-emoji">🔥</span><span class="card-title">第15問 食らいつく精神</span><span class="difficulty diff-easy">70%</span></summary><div class="card-body"><span class="card-subtitle">回避型 vs 食らいつき型、判定できるかな？</span><div class="score-label">みんなの正答率</div><div class="score-bar"><div class="score-bar-fill" style="width:70%; background:linear-gradient(90deg,#81c784,#66bb6a)"></div></div><span class="section-label">ケース判定</span><ul><li>会議中に黙って後でこっそり調べた → <strong>回避型</strong>（その場で聞くべき！）</li><li>テストの間違いをその日のうちにメモなしで確認 → <strong>食らいつき型</strong>（アクティブリコールの実践！）</li><li>「次回がんばろう」と思った → <strong>回避型</strong>（いつ・何をするか決まってない）</li><li>苦手だけど「はい」と答えた → <strong>回避型</strong>（苦手を隠すと後で発覚したとき大ダメージ）</li></ul><div class="keyword-chips"><span class="keyword-chip">回避型</span><span class="keyword-chip">食らいつき型</span><span class="keyword-chip">その場で聞く</span></div><details class="deep-dive"><summary>研修ノートから深掘り</summary><div class="deep-dive-body"><div class="dd-heading">回避型の本質</div>回避型は「その場のダメージを避けたい」という感情が行動を支配している状態。でも<strong>回避した分だけ後でより大きなダメージが返ってくる</strong>（苦手の発覚、ズレの蓄積）。<br><br>食らいつき型は「今の小さな恥」を受け入れて「未来の大きな失敗」を防いでいる。<strong>信頼残高の先行投資</strong>。</div></details></div></details>
 
-      <span class="section-label">お手本回答</span>
-      <div class="model-answer">
-        「アンケート集計データの件、<strong>承知しました</strong>。<strong>本日18時までに</strong>集計して<strong>お送りします</strong>。」
-      </div>
+    <details class="card"><summary><span class="card-arrow">&#9654;&#65038;</span><span class="card-emoji">🤝</span><span class="card-title">第16問 他者を動かす</span><span class="difficulty diff-hard">30%</span></summary><div class="card-body"><span class="card-subtitle">愚痴で終わらせない！3ステップで行動に変える</span><div class="score-label">みんなの正答率</div><div class="score-bar"><div class="score-bar-fill" style="width:30%; background:linear-gradient(90deg,#ef9a9a,#e57373)"></div></div><span class="section-label">3ステップ</span><ul><li><strong>①WHYを理解する</strong> → まず相手に「なぜこうしているのか」を聞く</li><li><strong>②空雨傘で構造化</strong> → 問題と改善案を整理して伝える</li><li><strong>③小さく始める</strong> → いきなり全部変えようとせず、まず1ヶ月データを取ってみる</li></ul><span class="section-label">覚えるポイント</span><ul><li>愚痴は行動を伴わない。動かなければ何も変わらない！</li></ul><div class="keyword-chips"><span class="keyword-chip">WHY理解</span><span class="keyword-chip">空雨傘で構造化</span><span class="keyword-chip">小さく始める</span></div><details class="deep-dive"><summary>研修ノートから深掘り</summary><div class="deep-dive-body"><div class="dd-heading">「嘆く」vs「変える」</div><table class="dd-table"><tr><th>嘆く（受け身）</th><th>変える（能動的）</th></tr><tr><td>「この仕組みは使いにくい」</td><td>改善提案を上司にする</td></tr><tr><td>「チームの連携が悪い」</td><td>ミーティング設計を自分がやる</td></tr><tr><td>「このやり方は非効率だ」</td><td>改善案を持って相談する</td></tr></table><strong>「自分がいなければ変わらなかったこと」を1つ作る</strong>のが目標。「誰かがやってくれるはずだ」と思っている時点で止まっている。</div></details></div></details>
 
-      <div class="keyword-chips">
-        <span class="keyword-chip">何の件か</span>
-        <span class="keyword-chip">承知</span>
-        <span class="keyword-chip">何をいつまでに</span>
-      </div>
-    </div>
-
-    <!-- 第7問 20%ルール -->
-    <div class="card">
-      <div class="card-head">
-        <span class="card-emoji">📐</span>
-        <span class="card-title">第7問 20%ルール</span>
-        <span class="difficulty diff-medium">みんなの得点率 52%</span>
-        <span class="card-subtitle">完成前に方向性を確認して手戻りを防ぐ</span>
-      </div>
-      <div class="score-label">みんなの正答率</div>
-      <div class="score-bar"><div class="score-bar-fill" style="width:52%; background:linear-gradient(90deg,#ffb74d,#ffa726)"></div></div>
-
-      <span class="section-label">覚えるポイント</span>
-      <ul>
-        <li><strong>骨子の3要素</strong> → タイトル・結論・構成</li>
-        <li><strong>3ステップ</strong> → ①骨子を先に作る → ②方向性確認を依頼 → ③合意後に作り込む</li>
-        <li>100%作ってから見せると、ズレてたとき全部やり直し…20%の段階で見せよう！</li>
-      </ul>
-
-      <div class="keyword-chips">
-        <span class="keyword-chip">タイトル・結論・構成</span>
-        <span class="keyword-chip">骨子で方向性確認</span>
-        <span class="keyword-chip">手戻り防止</span>
-      </div>
-    </div>
-
-    <!-- 第8問 仮説付き質問 -->
-    <div class="card">
-      <div class="card-head">
-        <span class="card-emoji">🤔</span>
-        <span class="card-title">第8問 仮説付き質問</span>
-        <span class="difficulty diff-medium">みんなの得点率 52%</span>
-        <span class="card-subtitle">「どうしたらいいですか？」を卒業する3つの型</span>
-      </div>
-      <div class="score-label">みんなの正答率</div>
-      <div class="score-bar"><div class="score-bar-fill" style="width:52%; background:linear-gradient(90deg,#ffb74d,#ffa726)"></div></div>
-
-      <span class="section-label">3つの型</span>
-      <ul>
-        <li><strong>検証型</strong> →「私はAだと思っているのですが、合っていますか？」</li>
-        <li><strong>比較提示型</strong> →「BとCで迷っています。理由は〇〇なのでBが良いと考えますが…」</li>
-        <li><strong>根拠参照型</strong> →「資料の△△に基づき、今回も適用可能と考えますが？」</li>
-      </ul>
-
-      <span class="section-label">覚えるポイント</span>
-      <ul>
-        <li>自分の仮説を添えて、相手が<strong>Yes/No で答えられる形</strong>にする → 相手の負荷が激減！</li>
-      </ul>
-
-      <div class="keyword-chips">
-        <span class="keyword-chip">検証型</span>
-        <span class="keyword-chip">比較提示型</span>
-        <span class="keyword-chip">根拠参照型</span>
-      </div>
-    </div>
-
-    <!-- 第9問 相手の立場依頼 -->
-    <div class="card">
-      <div class="card-head">
-        <span class="card-emoji">🙏</span>
-        <span class="card-title">第9問 相手の立場を想像した依頼</span>
-        <span class="difficulty diff-hard">みんなの得点率 34%</span>
-        <span class="card-subtitle">お願いするとき、相手の気持ちまで考える</span>
-      </div>
-      <div class="score-label">みんなの正答率</div>
-      <div class="score-bar"><div class="score-bar-fill" style="width:34%; background:linear-gradient(90deg,#ef9a9a,#e57373)"></div></div>
-
-      <span class="section-label">依頼文に必要な4要素</span>
-      <ul>
-        <li><strong>専門性への敬意</strong> →「なぜあなたに頼むのか」の理由を伝える</li>
-        <li><strong>主導権の譲渡</strong> → 日程の調整余地を持たせる</li>
-        <li><strong>断る余地</strong> →「繁忙期が終わってからでも構いません」など</li>
-        <li><strong>感謝の明文化</strong> → ちゃんとお礼を言葉にする</li>
-      </ul>
-
-      <span class="section-label">なぜ雑な依頼はダメ？</span>
-      <ul>
-        <li>相手の多忙さへの配慮がなく、何を教えればいいか不明確で、負担を丸投げしてるから</li>
-      </ul>
-
-      <div class="keyword-chips">
-        <span class="keyword-chip">敬意</span>
-        <span class="keyword-chip">主導権の譲渡</span>
-        <span class="keyword-chip">断る余地</span>
-        <span class="keyword-chip">感謝</span>
-      </div>
-    </div>
-
-    <!-- 第10問 報連相 -->
-    <div class="card">
-      <div class="card-head">
-        <span class="card-emoji">📣</span>
-        <span class="card-title">第10問 報連相の技術</span>
-        <span class="difficulty diff-medium">みんなの得点率 48%</span>
-        <span class="card-subtitle">第一声で種別宣言、丸投げ相談はNG</span>
-      </div>
-      <div class="score-label">みんなの正答率</div>
-      <div class="score-bar"><div class="score-bar-fill" style="width:48%; background:linear-gradient(90deg,#ffb74d,#ffa726)"></div></div>
-
-      <span class="section-label">覚えるポイント</span>
-      <ul>
-        <li><strong>第一声</strong> → 「報告/連絡/相談」のどれかを宣言する！</li>
-        <li><strong>NG</strong> → 丸投げ相談（「どうしたらいいですか？」）</li>
-        <li><strong>理想の3要素</strong> → ①種別宣言 ②結論ファースト ③自分なりの仮説を添える</li>
-      </ul>
-
-      <span class="section-label">お手本回答</span>
-      <div class="model-answer">
-        「K社に関する資料作成の<strong>ご相談</strong>です。データの場所を聞いたものの不明で、<strong>代わりにこの資料を使おうと思っている</strong>のですが、これでよろしいですか？」
-      </div>
-
-      <div class="keyword-chips">
-        <span class="keyword-chip">種別宣言</span>
-        <span class="keyword-chip">結論ファースト</span>
-        <span class="keyword-chip">仮説を添える</span>
-      </div>
-    </div>
-
-    <!-- 第11問 バッドニュース15分ルール -->
-    <div class="card">
-      <div class="card-head">
-        <span class="card-emoji">🚨</span>
-        <span class="card-title">第11問 バッドニュース15分ルール</span>
-        <span class="difficulty diff-hard">みんなの得点率 26%</span>
-        <span class="card-subtitle">一番みんなが苦戦したテーマ！テンプレを覚えよう</span>
-      </div>
-      <div class="score-label">みんなの正答率</div>
-      <div class="score-bar"><div class="score-bar-fill" style="width:26%; background:linear-gradient(90deg,#ef9a9a,#e57373)"></div></div>
-
-      <span class="section-label">一次報告テンプレートの4要素</span>
-      <ul>
-        <li><strong>①状況</strong> → 今何が起きているか</li>
-        <li><strong>②原因</strong> → なぜ起きたか（わかる範囲で）</li>
-        <li><strong>③経過</strong> → これまでの対応</li>
-        <li><strong>④対応案</strong> → これからどうするか</li>
-      </ul>
-
-      <span class="section-label">覚えるポイント</span>
-      <ul>
-        <li>冒頭で「バッドニュースの報告です」と宣言する</li>
-        <li><strong>15分以内</strong>に報告 → 早く伝えるほど取れる対処の選択肢が広がる！</li>
-        <li>「すぐ報告する」だけじゃなく、4要素のテンプレートで伝えるのが大事</li>
-      </ul>
-
-      <div class="keyword-chips">
-        <span class="keyword-chip">状況</span>
-        <span class="keyword-chip">原因</span>
-        <span class="keyword-chip">経過</span>
-        <span class="keyword-chip">対応案</span>
-        <span class="keyword-chip">15分以内</span>
-      </div>
-    </div>
-
-    <!-- 第12問 ネクストアクション -->
-    <div class="card">
-      <div class="card-head">
-        <span class="card-emoji">🎯</span>
-        <span class="card-title">第12問 ネクストアクション</span>
-        <span class="difficulty diff-medium">みんなの得点率 48%</span>
-        <span class="card-subtitle">曖昧な「やります」を具体的なアクションに変える</span>
-      </div>
-      <div class="score-label">みんなの正答率</div>
-      <div class="score-bar"><div class="score-bar-fill" style="width:48%; background:linear-gradient(90deg,#ffb74d,#ffa726)"></div></div>
-
-      <span class="section-label">NAの4要素</span>
-      <ul>
-        <li><strong>①Who</strong> → 誰が</li>
-        <li><strong>②When</strong> → いつまでに</li>
-        <li><strong>③What</strong> → 何を</li>
-        <li><strong>④Done条件</strong> → 何をもって完了とするか</li>
-      </ul>
-
-      <span class="section-label">お手本回答</span>
-      <div class="model-answer">
-        NG:「次回までに進捗共有」<br>
-        OK:「<strong>Mさん</strong>が<strong>4/15 17:00まで</strong>に<strong>デザイン案をSlackに投稿</strong>し、<strong>メンバー全員からOKを得る</strong>」
-      </div>
-
-      <div class="keyword-chips">
-        <span class="keyword-chip">Who</span>
-        <span class="keyword-chip">When</span>
-        <span class="keyword-chip">What</span>
-        <span class="keyword-chip">Done条件</span>
-      </div>
-    </div>
-
-    <!-- 第13問 振り返りの技術 -->
-    <div class="card">
-      <div class="card-head">
-        <span class="card-emoji">🪞</span>
-        <span class="card-title">第13問 振り返りの技術</span>
-        <span class="difficulty diff-hard">みんなの得点率 36%</span>
-        <span class="card-subtitle">「頑張ります」はNG！原因を分解して具体トライへ</span>
-      </div>
-      <div class="score-label">みんなの正答率</div>
-      <div class="score-bar"><div class="score-bar-fill" style="width:36%; background:linear-gradient(90deg,#ef9a9a,#e57373)"></div></div>
-
-      <span class="section-label">振り返りの4要素</span>
-      <ul>
-        <li><strong>①問題点指摘</strong> → 何がうまくいかなかったか</li>
-        <li><strong>②Why分析</strong> → なぜうまくいかなかったか（因果連鎖）</li>
-        <li><strong>③因数分解</strong> → 量の問題か質の問題か</li>
-        <li><strong>④具体トライ</strong> → 来週何をどうするか</li>
-      </ul>
-
-      <span class="section-label">覚えるポイント</span>
-      <ul>
-        <li>「頑張る」「しっかり」「気をつける」は<strong>NGワード</strong>！ → 原因が特定できず同じ失敗を繰り返す</li>
-      </ul>
-
-      <div class="keyword-chips">
-        <span class="keyword-chip">問題点指摘</span>
-        <span class="keyword-chip">Why分析</span>
-        <span class="keyword-chip">因数分解</span>
-        <span class="keyword-chip">具体トライ</span>
-      </div>
-    </div>
-
-    <!-- 第14問 新卒を脱ぎ捨てる -->
-    <div class="card">
-      <div class="card-head">
-        <span class="card-emoji">🚀</span>
-        <span class="card-title">第14問 「新卒」を脱ぎ捨てる</span>
-        <span class="difficulty diff-hard">みんなの得点率 38%</span>
-        <span class="card-subtitle">受け身を卒業！自分から動き出す</span>
-      </div>
-      <div class="score-label">みんなの正答率</div>
-      <div class="score-bar"><div class="score-bar-fill" style="width:38%; background:linear-gradient(90deg,#ef9a9a,#e57373)"></div></div>
-
-      <span class="section-label">覚えるポイント</span>
-      <ul>
-        <li>「他責思考はダメ」だけじゃ足りない → <strong>TOKIUMの組織特性</strong>に触れよう</li>
-        <li>TOKIUMは「<strong>スピード100で走りながら整える</strong>」組織</li>
-        <li><strong>不確実な環境で自分から動き出す力</strong>が求められる</li>
-      </ul>
-
-      <span class="section-label">お手本回答</span>
-      <div class="model-answer">
-        「まず動き出し、やりながら整えていくことが必要なため、隣の人を見て動くのでは時すでに遅し。」<br>
-        → 「走りながら整える」と「不確実な環境で動く」の2つに触れた回答！
-      </div>
-
-      <div class="keyword-chips">
-        <span class="keyword-chip">走りながら整える</span>
-        <span class="keyword-chip">不確実な環境</span>
-        <span class="keyword-chip">自分から動く</span>
-      </div>
-    </div>
-
-    <!-- 第15問 食らいつく精神 -->
-    <div class="card">
-      <div class="card-head">
-        <span class="card-emoji">🔥</span>
-        <span class="card-title">第15問 食らいつく精神</span>
-        <span class="difficulty diff-easy">みんなの得点率 70%</span>
-        <span class="card-subtitle">回避型 vs 食らいつき型、判定できるかな？</span>
-      </div>
-      <div class="score-label">みんなの正答率</div>
-      <div class="score-bar"><div class="score-bar-fill" style="width:70%; background:linear-gradient(90deg,#81c784,#66bb6a)"></div></div>
-
-      <span class="section-label">ケース判定</span>
-      <ul>
-        <li>会議中に黙って後でこっそり調べた → <strong>回避型</strong>（その場で聞くべき！）</li>
-        <li>テストの間違いをその日のうちにメモなしで確認 → <strong>食らいつき型</strong>（アクティブリコールの実践！）</li>
-        <li>「次回がんばろう」と思った → <strong>回避型</strong>（いつ・何をするか決まってない）</li>
-        <li>苦手だけど「はい」と答えた → <strong>回避型</strong>（苦手を隠すと後で発覚したとき大ダメージ）</li>
-      </ul>
-
-      <div class="keyword-chips">
-        <span class="keyword-chip">回避型</span>
-        <span class="keyword-chip">食らいつき型</span>
-        <span class="keyword-chip">その場で聞く</span>
-      </div>
-    </div>
-
-    <!-- 第16問 他者を動かす -->
-    <div class="card">
-      <div class="card-head">
-        <span class="card-emoji">🤝</span>
-        <span class="card-title">第16問 他者を動かす</span>
-        <span class="difficulty diff-hard">みんなの得点率 30%</span>
-        <span class="card-subtitle">愚痴で終わらせない！3ステップで行動に変える</span>
-      </div>
-      <div class="score-label">みんなの正答率</div>
-      <div class="score-bar"><div class="score-bar-fill" style="width:30%; background:linear-gradient(90deg,#ef9a9a,#e57373)"></div></div>
-
-      <span class="section-label">3ステップ</span>
-      <ul>
-        <li><strong>①WHYを理解する</strong> → まず相手に「なぜこうしているのか」を聞く</li>
-        <li><strong>②空雨傘で構造化</strong> → 問題と改善案を整理して伝える</li>
-        <li><strong>③小さく始める</strong> → いきなり全部変えようとせず、まず1ヶ月データを取ってみる</li>
-      </ul>
-
-      <span class="section-label">覚えるポイント</span>
-      <ul>
-        <li>愚痴は行動を伴わない。動かなければ何も変わらない！</li>
-      </ul>
-
-      <div class="keyword-chips">
-        <span class="keyword-chip">WHY理解</span>
-        <span class="keyword-chip">空雨傘で構造化</span>
-        <span class="keyword-chip">小さく始める</span>
-      </div>
-    </div>
-
-    <!-- 第17問 前/後ろの行動 -->
-    <div class="card">
-      <div class="card-head">
-        <span class="card-emoji">⏩</span>
-        <span class="card-title">第17問 前/後ろの行動</span>
-        <span class="difficulty diff-hard">みんなの得点率 42%</span>
-        <span class="card-subtitle">その行動、チームを前に進めてる？後ろに引っ張ってる？</span>
-      </div>
-      <div class="score-label">みんなの正答率</div>
-      <div class="score-bar"><div class="score-bar-fill" style="width:42%; background:linear-gradient(90deg,#ef9a9a,#e57373)"></div></div>
-
-      <span class="section-label">ケース判定</span>
-      <ul>
-        <li>データに基づくリスク指摘 → <strong>前に進める</strong>（判断の質を上げる！）</li>
-        <li>他タスクあるのに引き受けて遅延 → <strong>後ろに引っ張る</strong>（優先順位を確認すべき）</li>
-        <li>懸念があるのに黙ってトラブルに → <strong>後ろに引っ張る</strong>（情報共有しなかった）</li>
-        <li>公の場で具体的フィードバック → <strong>前に進める</strong>（ただし1on1のほうがベター）</li>
-        <li>スケジュール遅延を指摘＋代替案提示 → <strong>前に進める</strong>（事実直視＋提案）</li>
-        <li>「愚痴→提案に変えろ」発言 → <strong>前の意図だが場が後ろ</strong>（正論でも場を選ぶ）</li>
-      </ul>
-
-      <span class="section-label">覚えるポイント</span>
-      <ul>
-        <li>判定が分かれるケースもある → 「前」「後ろ」どちらでも<strong>理由が合理的であればOK</strong></li>
-      </ul>
-
-      <div class="keyword-chips">
-        <span class="keyword-chip">前に進める</span>
-        <span class="keyword-chip">後ろに引っ張る</span>
-        <span class="keyword-chip">理由が大事</span>
-      </div>
-    </div>
+    <details class="card"><summary><span class="card-arrow">&#9654;&#65038;</span><span class="card-emoji">⏩</span><span class="card-title">第17問 前/後ろの行動</span><span class="difficulty diff-hard">42%</span></summary><div class="card-body"><span class="card-subtitle">その行動、チームを前に進めてる？後ろに引っ張ってる？</span><div class="score-label">みんなの正答率</div><div class="score-bar"><div class="score-bar-fill" style="width:42%; background:linear-gradient(90deg,#ef9a9a,#e57373)"></div></div><span class="section-label">ケース判定</span><ul><li>データに基づくリスク指摘 → <strong>前に進める</strong>（判断の質を上げる！）</li><li>他タスクあるのに引き受けて遅延 → <strong>後ろに引っ張る</strong>（優先順位を確認すべき）</li><li>懸念があるのに黙ってトラブルに → <strong>後ろに引っ張る</strong>（情報共有しなかった）</li><li>公の場で具体的フィードバック → <strong>前に進める</strong>（ただし1on1のほうがベター）</li><li>スケジュール遅延を指摘＋代替案提示 → <strong>前に進める</strong>（事実直視＋提案）</li><li>「愚痴→提案に変えろ」発言 → <strong>前の意図だが場が後ろ</strong>（正論でも場を選ぶ）</li></ul><span class="section-label">覚えるポイント</span><ul><li>判定が分かれるケースもある → 「前」「後ろ」どちらでも<strong>理由が合理的であればOK</strong></li></ul><div class="keyword-chips"><span class="keyword-chip">前に進める</span><span class="keyword-chip">後ろに引っ張る</span><span class="keyword-chip">理由が大事</span></div><details class="deep-dive"><summary>研修ノートから深掘り</summary><div class="deep-dive-body"><div class="dd-heading">グレーゾーン：正論なのに後ろに引っ張る行動</div><table class="dd-table"><tr><th>行動</th><th>一見正しいが…</th></tr><tr><td>「目標にないからやりません」</td><td>自分の正しさ優先でチームが止まる</td></tr><tr><td>「リスクがあると思います」（以上）</td><td>代替案なし＝評論家。議論が止まる</td></tr><tr><td>「前にやって失敗しました」</td><td>過去の失敗で現在の挑戦を止めている</td></tr><tr><td>「自分が正しいことを証明する」</td><td>目的が「勝つこと」になり合意形成を阻害</td></tr></table><div class="dd-heading">懸念の正しい出し方</div>懸念を伝えること自体は極めて重要。問題は伝え方。<br>NG：「リスクがあります」（止めるだけ）<br>OK：「○○というリスクがあります。<strong>△△に変えれば軽減できます</strong>」<br><strong>懸念＋代替案＝前に進める。懸念のみ＝止める。</strong></div></details></div></details>
 
   </div>
 

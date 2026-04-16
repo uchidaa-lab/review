@@ -3,778 +3,1281 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>効果測定テスト クイズ</title>
+  <title>効果測定クイズ - パワーアップ版</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     body {
       font-family: 'Hiragino Sans', 'Meiryo', sans-serif;
       background: linear-gradient(135deg, #e0f7fa 0%, #e8eaf6 30%, #fce4ec 60%, #fff9c4 100%);
       background-attachment: fixed;
       color: #444;
       min-height: 100vh;
-      padding: 32px 16px 80px;
+      padding: 24px 16px 80px;
     }
+    .hidden { display: none !important; }
 
-    .page-header {
-      text-align: center;
-      margin-bottom: 12px;
-      animation: dropIn 0.5s ease both;
-    }
-    @keyframes dropIn {
-      from { opacity: 0; transform: translateY(-20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .page-header h1 {
-      font-size: 2rem;
-      color: #00695c;
-    }
-    .page-header p {
-      font-size: 0.95rem;
-      color: #4db6ac;
-      margin-top: 4px;
-    }
+    /* ── Header ── */
+    .page-header { text-align: center; margin-bottom: 20px; animation: dropIn .5s ease both; }
+    @keyframes dropIn { from { opacity:0; transform:translateY(-20px); } to { opacity:1; transform:translateY(0); } }
+    .page-header h1 { font-size: 1.8rem; color: #00695c; }
+    .page-header p { font-size: .92rem; color: #4db6ac; margin-top: 4px; }
 
-    .nav-bar {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
-    .nav-bar a {
-      font-size: 0.82rem;
-      color: #00695c;
-      text-decoration: none;
-      padding: 6px 16px;
-      border-radius: 20px;
-      background: rgba(255,255,255,0.7);
-      border: 1px solid rgba(0,105,92,0.2);
-      transition: all 0.2s;
-    }
-    .nav-bar a:hover { background: rgba(0,105,92,0.1); }
-    .nav-bar a.current { background: #80cbc4; color: #fff; border-color: #80cbc4; }
+    /* ── Nav ── */
+    .nav-bar { display:flex; justify-content:center; gap:10px; margin-bottom:24px; flex-wrap:wrap; }
+    .nav-bar a { font-size:.82rem; color:#00695c; text-decoration:none; padding:6px 16px; border-radius:20px; background:rgba(255,255,255,.7); border:1px solid rgba(0,105,92,.2); transition:all .2s; }
+    .nav-bar a:hover { background:rgba(0,105,92,.1); }
+    .nav-bar a.current { background:#80cbc4; color:#fff; border-color:#80cbc4; }
 
-    /* Score board */
-    .score-board {
-      max-width: 720px;
-      margin: 0 auto 24px;
-      background: rgba(255,255,255,0.9);
-      backdrop-filter: blur(8px);
-      border-radius: 16px;
-      padding: 20px 24px;
-      text-align: center;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-      border: 1px solid rgba(255,255,255,0.9);
-      position: sticky;
-      top: 12px;
-      z-index: 10;
-    }
-    .score-board .score-text {
-      font-size: 1.4rem;
-      font-weight: bold;
-      color: #00695c;
-    }
-    .score-board .score-sub {
-      font-size: 0.8rem;
-      color: #80cbc4;
-      margin-top: 4px;
-    }
-    .score-bar-outer {
-      height: 10px;
-      background: #e0f2f1;
-      border-radius: 5px;
-      margin-top: 10px;
-      overflow: hidden;
-    }
-    .score-bar-inner {
-      height: 100%;
-      background: linear-gradient(90deg, #4db6ac, #00897b);
-      border-radius: 5px;
-      width: 0%;
-      transition: width 0.5s ease;
-    }
-
-    .questions {
-      max-width: 720px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-    }
-
-    .q-card {
-      background: rgba(255,255,255,0.88);
+    /* ── Start Screen ── */
+    .start-screen { max-width:720px; margin:0 auto; }
+    .level-cards { display:flex; flex-direction:column; gap:14px; margin-bottom:28px; }
+    .level-card {
+      background: rgba(255,255,255,.9);
       backdrop-filter: blur(8px);
       border-radius: 16px;
       padding: 22px 24px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-      border: 1px solid rgba(255,255,255,0.9);
-    }
-
-    .q-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 14px;
-      flex-wrap: wrap;
-    }
-    .q-num {
-      font-size: 0.72rem;
-      font-weight: bold;
-      color: #fff;
-      background: linear-gradient(135deg, #4db6ac, #00897b);
-      padding: 3px 12px;
-      border-radius: 12px;
-    }
-    .q-theme {
-      font-size: 0.78rem;
-      color: #80cbc4;
-    }
-
-    .q-text {
-      font-size: 1rem;
-      font-weight: bold;
-      color: #1b5e20;
-      line-height: 1.6;
-      margin-bottom: 16px;
-      padding-left: 4px;
-    }
-
-    .reveal-btn {
-      display: inline-block;
-      padding: 8px 24px;
-      background: linear-gradient(135deg, #80cbc4, #4db6ac);
-      color: #fff;
-      border: none;
-      border-radius: 24px;
-      font-size: 0.88rem;
-      font-weight: bold;
+      box-shadow: 0 4px 20px rgba(0,0,0,.06);
+      border: 2px solid transparent;
       cursor: pointer;
-      transition: all 0.2s;
-      font-family: inherit;
+      transition: all .25s;
+      position: relative;
+      overflow: hidden;
     }
-    .reveal-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(0,105,92,0.25);
+    .level-card:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0,0,0,.1); }
+    .level-card.selected { border-color: #00897b; }
+    .level-card .lv-badge {
+      display:inline-block; font-size:.72rem; font-weight:bold; color:#fff;
+      padding:3px 12px; border-radius:12px; margin-bottom:8px;
     }
-    .reveal-btn:active { transform: translateY(0); }
-    .reveal-btn.revealed {
-      background: #e0e0e0;
-      color: #999;
-      cursor: default;
-      transform: none;
-      box-shadow: none;
-    }
+    .lv1 .lv-badge { background: linear-gradient(135deg,#81c784,#4caf50); }
+    .lv2 .lv-badge { background: linear-gradient(135deg,#64b5f6,#1e88e5); }
+    .lv3 .lv-badge { background: linear-gradient(135deg,#ff8a65,#f4511e); }
+    .lv4 .lv-badge { background: linear-gradient(135deg,#b39ddb,#7e57c2); }
+    .section-divider { text-align:center; font-size:.78rem; color:#aaa; margin:8px 0; letter-spacing:.1em; }
+    .q-diff-tag.d4 { background:#e1bee7; color:#6a1b9a; }
+    .level-card h3 { font-size:1.05rem; color:#1b5e20; margin-bottom:4px; }
+    .level-card p { font-size:.85rem; color:#777; line-height:1.5; }
+    .level-card .lv-detail { font-size:.78rem; color:#aaa; margin-top:6px; }
 
-    .answer-area {
-      display: none;
-      margin-top: 16px;
-      padding: 16px 18px;
-      background: linear-gradient(135deg, #e0f2f144, #e8f5e944);
-      border-radius: 12px;
-      border-left: 3px solid #4db6ac;
+    .start-btn {
+      display:block; width:100%; max-width:320px; margin:0 auto;
+      padding:14px 24px; background:linear-gradient(135deg,#80cbc4,#00897b);
+      color:#fff; border:none; border-radius:28px; font-size:1rem; font-weight:bold;
+      cursor:pointer; font-family:inherit; transition:all .2s;
     }
-    .answer-area.show { display: block; animation: fadeIn 0.3s ease; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .start-btn:hover { transform:translateY(-2px); box-shadow:0 6px 16px rgba(0,105,92,.3); }
+    .start-btn:disabled { background:#ccc; cursor:default; transform:none; box-shadow:none; }
 
-    .answer-label {
-      font-size: 0.72rem;
-      font-weight: bold;
-      color: #00897b;
-      letter-spacing: 0.08em;
-      margin-bottom: 8px;
+    /* ── History ── */
+    .history-section { margin-top:28px; }
+    .history-section h3 { font-size:.9rem; color:#00695c; margin-bottom:10px; text-align:center; }
+    .history-list { display:flex; flex-direction:column; gap:8px; }
+    .history-item {
+      background:rgba(255,255,255,.8); border-radius:12px; padding:12px 16px;
+      display:flex; justify-content:space-between; align-items:center; font-size:.82rem;
     }
-    .answer-text {
-      font-size: 0.88rem;
-      line-height: 1.7;
-      color: #555;
-    }
-    .answer-text strong { color: #00695c; }
-    .answer-point {
-      margin-top: 10px;
-      font-size: 0.82rem;
-      color: #4db6ac;
-      font-style: italic;
-    }
+    .history-item .hi-date { color:#999; }
+    .history-item .hi-level { font-weight:bold; }
+    .hi-level.l1 { color:#4caf50; } .hi-level.l2 { color:#1e88e5; } .hi-level.l3 { color:#f4511e; } .hi-level.l4 { color:#7e57c2; }
+    .history-item .hi-score { font-weight:bold; color:#00695c; }
+    .no-history { text-align:center; color:#bbb; font-size:.85rem; padding:20px; }
 
-    .check-area {
-      display: none;
-      margin-top: 14px;
-      padding-top: 12px;
-      border-top: 1px dashed #c8e6c9;
+    /* ── Quiz Screen ── */
+    .quiz-screen { max-width:720px; margin:0 auto; }
+    .progress-board {
+      background:rgba(255,255,255,.92); backdrop-filter:blur(8px);
+      border-radius:16px; padding:16px 20px; margin-bottom:20px;
+      box-shadow:0 4px 20px rgba(0,0,0,.06); position:sticky; top:12px; z-index:10;
     }
-    .check-area.show { display: flex; gap: 10px; }
+    .progress-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+    .progress-label { font-size:.88rem; font-weight:bold; color:#00695c; }
+    .progress-count { font-size:.82rem; color:#80cbc4; }
+    .progress-bar-outer { height:8px; background:#e0f2f1; border-radius:4px; overflow:hidden; }
+    .progress-bar-inner { height:100%; background:linear-gradient(90deg,#4db6ac,#00897b); border-radius:4px; width:0%; transition:width .4s ease; }
 
-    .check-btn {
-      padding: 6px 18px;
-      border-radius: 20px;
-      font-size: 0.82rem;
-      font-weight: bold;
-      border: 2px solid;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: inherit;
-      background: transparent;
+    .q-card {
+      background:rgba(255,255,255,.9); backdrop-filter:blur(8px);
+      border-radius:16px; padding:28px 24px;
+      box-shadow:0 4px 20px rgba(0,0,0,.06); animation:fadeUp .35s ease both;
     }
-    .check-btn.correct {
-      border-color: #81c784;
-      color: #2e7d32;
-    }
-    .check-btn.correct:hover, .check-btn.correct.active {
-      background: #81c784;
-      color: #fff;
-    }
-    .check-btn.wrong {
-      border-color: #ef9a9a;
-      color: #c62828;
-    }
-    .check-btn.wrong:hover, .check-btn.wrong.active {
-      background: #ef9a9a;
-      color: #fff;
-    }
-    .check-btn.active { cursor: default; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+    .q-meta { display:flex; align-items:center; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
+    .q-num { font-size:.72rem; font-weight:bold; color:#fff; background:linear-gradient(135deg,#4db6ac,#00897b); padding:3px 12px; border-radius:12px; }
+    .q-theme-tag { font-size:.78rem; color:#80cbc4; }
+    .q-diff-tag { font-size:.68rem; padding:2px 10px; border-radius:10px; font-weight:bold; }
+    .q-diff-tag.d1 { background:#c8e6c9; color:#2e7d32; }
+    .q-diff-tag.d2 { background:#bbdefb; color:#1565c0; }
+    .q-diff-tag.d3 { background:#ffccbc; color:#d84315; }
 
-    .result-area {
-      max-width: 720px;
-      margin: 32px auto 0;
-      background: rgba(255,255,255,0.92);
-      border-radius: 16px;
-      padding: 28px;
-      text-align: center;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-      display: none;
-    }
-    .result-area.show { display: block; animation: fadeIn 0.4s ease; }
-    .result-emoji { font-size: 3rem; margin-bottom: 8px; }
-    .result-msg {
-      font-size: 1.2rem;
-      font-weight: bold;
-      color: #00695c;
-      margin-bottom: 6px;
-    }
-    .result-sub {
-      font-size: 0.88rem;
-      color: #80cbc4;
-    }
-    .retry-btn {
-      display: inline-block;
-      margin-top: 16px;
-      padding: 10px 28px;
-      background: linear-gradient(135deg, #80cbc4, #4db6ac);
-      color: #fff;
-      border: none;
-      border-radius: 24px;
-      font-size: 0.92rem;
-      font-weight: bold;
-      cursor: pointer;
-      font-family: inherit;
-      text-decoration: none;
-      transition: all 0.2s;
-    }
-    .retry-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,105,92,0.25); }
+    .q-text { font-size:1rem; font-weight:bold; color:#1b5e20; line-height:1.65; margin-bottom:20px; }
 
-    @media (max-width: 600px) {
-      body { padding: 20px 10px 60px; }
-      .page-header h1 { font-size: 1.5rem; }
-      .q-card { padding: 18px 16px; }
-      .score-board { padding: 14px 16px; }
+    .choices { display:flex; flex-direction:column; gap:10px; }
+    .choice-btn {
+      display:flex; align-items:flex-start; gap:12px;
+      width:100%; text-align:left; padding:14px 16px;
+      background:#f5f5f5; border:2px solid #e0e0e0; border-radius:12px;
+      font-size:.9rem; line-height:1.5; cursor:pointer; transition:all .2s;
+      font-family:inherit; color:#444;
+    }
+    .choice-btn:hover:not(.locked) { border-color:#80cbc4; background:#e0f2f1; }
+    .choice-btn .choice-label {
+      flex-shrink:0; width:28px; height:28px; border-radius:50%;
+      background:#e0e0e0; color:#888; font-weight:bold; font-size:.82rem;
+      display:flex; align-items:center; justify-content:center; transition:all .2s;
+    }
+    .choice-btn.correct { border-color:#4caf50; background:#e8f5e9; }
+    .choice-btn.correct .choice-label { background:#4caf50; color:#fff; }
+    .choice-btn.wrong { border-color:#ef5350; background:#ffebee; }
+    .choice-btn.wrong .choice-label { background:#ef5350; color:#fff; }
+    .choice-btn.locked { cursor:default; opacity:.6; }
+    .choice-btn.correct.locked { opacity:1; }
+
+    .feedback-area { margin-top:18px; padding:16px 18px; border-radius:12px; animation:fadeIn .3s ease; }
+    @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+    .feedback-area.is-correct { background:linear-gradient(135deg,#e8f5e944,#c8e6c944); border-left:3px solid #4caf50; }
+    .feedback-area.is-wrong { background:linear-gradient(135deg,#ffebee44,#ffcdd244); border-left:3px solid #ef5350; }
+    .feedback-title { font-size:.82rem; font-weight:bold; margin-bottom:6px; }
+    .feedback-area.is-correct .feedback-title { color:#2e7d32; }
+    .feedback-area.is-wrong .feedback-title { color:#c62828; }
+    .feedback-text { font-size:.85rem; line-height:1.65; color:#555; }
+    .feedback-text strong { color:#00695c; }
+
+    .next-btn {
+      display:block; width:100%; margin-top:18px; padding:12px;
+      background:linear-gradient(135deg,#80cbc4,#00897b); color:#fff;
+      border:none; border-radius:24px; font-size:.92rem; font-weight:bold;
+      cursor:pointer; font-family:inherit; transition:all .2s;
+    }
+    .next-btn:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(0,105,92,.25); }
+
+    /* ── Text Question ── */
+    .text-input-area { display:flex; flex-direction:column; gap:10px; }
+    .text-input-area textarea {
+      width:100%; min-height:100px; padding:14px; border:2px solid #e0e0e0; border-radius:12px;
+      font-size:.9rem; line-height:1.6; font-family:inherit; color:#444; resize:vertical;
+      transition:border-color .2s;
+    }
+    .text-input-area textarea:focus { outline:none; border-color:#80cbc4; }
+    .text-input-area textarea.locked { background:#fafafa; color:#888; }
+    .submit-text-btn {
+      align-self:flex-end; padding:10px 28px; border-radius:22px; font-size:.88rem; font-weight:bold;
+      background:linear-gradient(135deg,#80cbc4,#00897b); color:#fff;
+      border:none; cursor:pointer; font-family:inherit; transition:all .2s;
+    }
+    .submit-text-btn:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(0,105,92,.25); }
+    .submit-text-btn:disabled { background:#ccc; cursor:default; transform:none; box-shadow:none; }
+    .kw-result { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+    .kw-tag { font-size:.78rem; padding:4px 12px; border-radius:14px; font-weight:bold; }
+    .kw-hit { background:#c8e6c9; color:#2e7d32; }
+    .kw-miss { background:#ffcdd2; color:#c62828; }
+    .kw-hint { font-size:.78rem; color:#aaa; margin-top:4px; }
+
+    /* ── Revenge Card ── */
+    .revenge-card {
+      background:linear-gradient(135deg,#fff3e0,#ffe0b2); border-radius:16px;
+      padding:20px 24px; margin-bottom:20px; box-shadow:0 4px 20px rgba(0,0,0,.06);
+      border:2px solid #ffcc80; cursor:pointer; transition:all .25s; text-align:center;
+    }
+    .revenge-card:hover { transform:translateY(-2px); box-shadow:0 6px 24px rgba(0,0,0,.1); }
+    .revenge-card h3 { font-size:1rem; color:#e65100; margin-bottom:4px; }
+    .revenge-card p { font-size:.82rem; color:#bf360c; }
+    .revenge-card .rv-count { font-size:1.8rem; font-weight:bold; color:#e65100; }
+
+    /* ── Result Screen ── */
+    .result-screen { max-width:720px; margin:0 auto; }
+    .result-card {
+      background:rgba(255,255,255,.92); border-radius:16px; padding:32px 24px;
+      text-align:center; box-shadow:0 4px 20px rgba(0,0,0,.06); margin-bottom:20px;
+      animation:fadeUp .4s ease both;
+    }
+    .result-emoji { font-size:3.5rem; margin-bottom:8px; }
+    .result-score { font-size:2rem; font-weight:bold; color:#00695c; }
+    .result-msg { font-size:.95rem; color:#4db6ac; margin-top:6px; }
+    .result-comparison { font-size:.82rem; color:#aaa; margin-top:10px; }
+    .result-comparison .improve { color:#4caf50; font-weight:bold; }
+    .result-comparison .decline { color:#ef5350; font-weight:bold; }
+
+    .weak-section {
+      background:rgba(255,255,255,.88); border-radius:16px; padding:22px 24px;
+      box-shadow:0 4px 20px rgba(0,0,0,.06); margin-bottom:20px;
+      animation:fadeUp .4s ease both; animation-delay:.1s;
+    }
+    .weak-section h3 { font-size:.92rem; color:#c62828; margin-bottom:12px; }
+    .weak-item { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #f5f5f5; font-size:.85rem; }
+    .weak-item:last-child { border-bottom:none; }
+    .weak-item .wi-emoji { font-size:1.2rem; }
+    .weak-item .wi-name { flex:1; color:#555; }
+    .weak-item .wi-tag { font-size:.72rem; padding:2px 10px; border-radius:10px; background:#ffcdd2; color:#c62828; font-weight:bold; }
+    .all-correct-msg { text-align:center; color:#4caf50; font-size:.9rem; padding:12px; }
+
+    .result-actions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:8px; }
+    .result-actions button, .result-actions a {
+      padding:12px 24px; border-radius:24px; font-size:.88rem; font-weight:bold;
+      cursor:pointer; font-family:inherit; text-decoration:none; border:none; transition:all .2s;
+    }
+    .btn-retry { background:linear-gradient(135deg,#80cbc4,#00897b); color:#fff; }
+    .btn-retry:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(0,105,92,.25); }
+    .btn-home { background:linear-gradient(135deg,#ffab91,#ff7043); color:#fff; }
+    .btn-home:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(255,87,34,.25); }
+    .btn-review { background:rgba(255,255,255,.8); color:#00695c; border:2px solid #80cbc4 !important; }
+    .btn-review:hover { background:#e0f2f1; }
+
+    /* ── Quit Button ── */
+    .quit-btn {
+      padding:5px 14px; border-radius:16px; font-size:.75rem; font-weight:bold;
+      background:transparent; color:#e57373; border:1.5px solid #e57373;
+      cursor:pointer; font-family:inherit; transition:all .2s; white-space:nowrap;
+    }
+    .quit-btn:hover { background:#ffebee; }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:100;
+      display:flex; align-items:center; justify-content:center; animation:fadeIn .2s ease;
+    }
+    .modal-box {
+      background:#fff; border-radius:20px; padding:28px 24px; max-width:360px; width:90%;
+      box-shadow:0 12px 40px rgba(0,0,0,.18); text-align:center; animation:fadeUp .25s ease both;
+    }
+    .modal-box h3 { font-size:1.05rem; color:#c62828; margin-bottom:6px; }
+    .modal-box .modal-sub { font-size:.85rem; color:#888; margin-bottom:8px; line-height:1.5; }
+    .modal-box .modal-score { font-size:.92rem; font-weight:bold; color:#00695c; margin-bottom:18px; }
+    .modal-actions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+    .modal-actions button {
+      padding:10px 20px; border-radius:22px; font-size:.85rem; font-weight:bold;
+      cursor:pointer; font-family:inherit; border:none; transition:all .2s;
+    }
+    .mbtn-save { background:linear-gradient(135deg,#80cbc4,#00897b); color:#fff; }
+    .mbtn-save:hover { transform:translateY(-1px); box-shadow:0 4px 10px rgba(0,105,92,.25); }
+    .mbtn-discard { background:#ffcdd2; color:#c62828; }
+    .mbtn-discard:hover { transform:translateY(-1px); box-shadow:0 4px 10px rgba(198,40,40,.2); }
+    .mbtn-cancel { background:#f5f5f5; color:#888; }
+    .mbtn-cancel:hover { background:#eee; }
+
+    /* ── Responsive ── */
+    @media (max-width:600px) {
+      body { padding:16px 10px 60px; }
+      .page-header h1 { font-size:1.4rem; }
+      .q-card, .level-card { padding:18px 16px; }
+      .result-card { padding:24px 16px; }
     }
   </style>
 </head>
 <body>
 
+<!-- ========== START SCREEN ========== -->
+<div id="screen-start" class="start-screen">
   <div class="page-header">
     <h1>効果測定クイズ</h1>
-    <p>全17問！どれだけ覚えてるかチャレンジしてみよう</p>
+    <p>ランダム10問で実力チェック！ レベルを選んでスタート</p>
   </div>
 
   <nav class="nav-bar">
-    <a href="review.html">復習ノート</a>
+    <a href="index.html">復習ノート</a>
     <a href="quiz.html" class="current">クイズに挑戦</a>
-    <a href="index.html">ポートフォリオ</a>
   </nav>
 
-  <div class="score-board">
-    <div class="score-text"><span id="correct-count">0</span> / <span id="total-count">17</span> 問正解</div>
-    <div class="score-sub">答えを見て、できたかどうか自分でチェックしてね</div>
-    <div class="score-bar-outer"><div class="score-bar-inner" id="score-bar"></div></div>
+  <div class="level-cards">
+    <div class="level-card lv1" onclick="selectLevel(1)">
+      <span class="lv-badge">Lv.1</span>
+      <h3>基礎チェック</h3>
+      <p>キーワードや定義を4択で確認。まずはここから！</p>
+      <div class="lv-detail">全19問の中からランダム10問</div>
+    </div>
+    <div class="level-card lv2" onclick="selectLevel(2)">
+      <span class="lv-badge">Lv.2</span>
+      <h3>応用チャレンジ</h3>
+      <p>紛らわしい選択肢が混ざるよ。ちゃんと理解してないと間違える！</p>
+      <div class="lv-detail">全18問の中からランダム10問</div>
+    </div>
+    <div class="level-card lv3" onclick="selectLevel(3)">
+      <span class="lv-badge">Lv.3</span>
+      <h3>実践マスター</h3>
+      <p>シナリオ型＋記述問題！ 「この場面でどうする？」を自分の言葉で書こう</p>
+      <div class="lv-detail">全23問（記述6問+4択17問）の中からランダム10問</div>
+    </div>
+
+    <div class="section-divider">--- Claude Code研修 ---</div>
+
+    <div class="level-card lv4" onclick="selectLevel(4)">
+      <span class="lv-badge">CC</span>
+      <h3>Claude Code研修クイズ</h3>
+      <p>d10〜d13で学んだClaude Codeの知識をチェック！ MCP・Skills・セキュリティなど</p>
+      <div class="lv-detail">全15問すべて出題</div>
+    </div>
   </div>
 
-  <div class="questions">
+  <button class="start-btn" id="start-btn" disabled onclick="startQuiz()">レベルを選んでね</button>
 
-    <!-- Q1 -->
-    <div class="q-card" data-q="1">
-      <div class="q-header">
-        <span class="q-num">Q1</span>
-        <span class="q-theme">🏠 研修の根本</span>
-      </div>
-      <div class="q-text">「仕事とは何ですか？」を一言で答えてみよう。<br>また、TOKIUMが伝えた「目指す人物像」の4要素は？</div>
-      <button class="reveal-btn" onclick="reveal(this)">答えを見る</button>
-      <div class="answer-area">
-        <div class="answer-label">こたえ</div>
-        <div class="answer-text">
-          仕事とは → <strong>ステークホルダーを安心させること</strong><br><br>
-          目指す人物像の4要素 → <strong>「5年後に」「組織を牽引する」「異常な情熱を持つ」「リーダー」</strong>
-        </div>
-        <div class="answer-point">「5年後」と「組織を牽引」が抜けやすいので注意！</div>
-      </div>
-      <div class="check-area">
-        <button class="check-btn correct" onclick="check(this, true)">できた！</button>
-        <button class="check-btn wrong" onclick="check(this, false)">もう一回復習する</button>
-      </div>
+  <div id="revenge-section" class="hidden">
+    <div class="revenge-card" onclick="startRevenge()">
+      <div class="rv-count" id="revenge-count">0</div>
+      <h3>間違えた問題にリベンジ！</h3>
+      <p>前回までに間違えた問題だけ集めて再挑戦できるよ</p>
     </div>
-
-    <!-- Q2 -->
-    <div class="q-card" data-q="2">
-      <div class="q-header">
-        <span class="q-num">Q2</span>
-        <span class="q-theme">💪 6動詞</span>
-      </div>
-      <div class="q-text">ビジネスの基本動作「6つの動詞」を全て挙げてみよう。<br>「学ぶ」の定義は何だった？</div>
-      <button class="reveal-btn" onclick="reveal(this)">答えを見る</button>
-      <div class="answer-area">
-        <div class="answer-label">こたえ</div>
-        <div class="answer-text">
-          6動詞 → <strong>学ぶ・聴く・読む・書く・話す・巻き込む</strong><br><br>
-          「学ぶ」の定義 → <strong>教わったことを、翌日、自力で100%再現できること</strong>
-        </div>
-        <div class="answer-point">「100%再現」がキーワード！復習 vs 新しい本の問題では「バケツの穴」「アクティブリコール」にも触れよう</div>
-      </div>
-      <div class="check-area">
-        <button class="check-btn correct" onclick="check(this, true)">できた！</button>
-        <button class="check-btn wrong" onclick="check(this, false)">もう一回復習する</button>
-      </div>
-    </div>
-
-    <!-- Q3 -->
-    <div class="q-card" data-q="3">
-      <div class="q-header">
-        <span class="q-num">Q3</span>
-        <span class="q-theme">☂️ 空・雨・傘</span>
-      </div>
-      <div class="q-text">空・雨・傘の3層はそれぞれ何を表す？<br>「なぜ3層に分けて伝えるの？」の目的も答えてみよう。</div>
-      <button class="reveal-btn" onclick="reveal(this)">答えを見る</button>
-      <div class="answer-area">
-        <div class="answer-label">こたえ</div>
-        <div class="answer-text">
-          <strong>空</strong> = 事実　<strong>雨</strong> = 解釈　<strong>傘</strong> = 提案<br><br>
-          目的 → <strong>上司の思考コストを下げて、信頼残高を貯めるため</strong>
-        </div>
-        <div class="answer-point">傘（提案）には「何を」「いつまでに」を入れるのがポイント！</div>
-      </div>
-      <div class="check-area">
-        <button class="check-btn correct" onclick="check(this, true)">できた！</button>
-        <button class="check-btn wrong" onclick="check(this, false)">もう一回復習する</button>
-      </div>
-    </div>
-
-    <!-- Q4 -->
-    <div class="q-card" data-q="4">
-      <div class="q-header">
-        <span class="q-num">Q4</span>
-        <span class="q-theme">🔍 具体と抽象</span>
-      </div>
-      <div class="q-text">具体的な行動を書くときに使ってはいけないNGワードは？<br>代わりにどんな形で書くべき？</div>
-      <button class="reveal-btn" onclick="reveal(this)">答えを見る</button>
-      <div class="answer-area">
-        <div class="answer-label">こたえ</div>
-        <div class="answer-text">
-          NGワード → <strong>「意識する」「気をつける」</strong>など曖昧な表現<br><br>
-          代わりに → <strong>「誰が・いつまでに・何を」</strong>が明確で、すぐ動ける粒度で書く
-        </div>
-        <div class="answer-point">例：「明日から会議のたびにノートを開いて決定事項を1行ずつ記録する」のように具体的に！</div>
-      </div>
-      <div class="check-area">
-        <button class="check-btn correct" onclick="check(this, true)">できた！</button>
-        <button class="check-btn wrong" onclick="check(this, false)">もう一回復習する</button>
-      </div>
-    </div>
-
-    <!-- Q5 -->
-    <div class="q-card" data-q="5">
-      <div class="q-header">
-        <span class="q-num">Q5</span>
-        <span class="q-theme">✍️ 簡潔にロジカル</span>
-      </div>
-      <div class="q-text">PREP法の4つの要素と、文章を簡潔にする4原則を挙げてみよう。</div>
-      <button class="reveal-btn" onclick="reveal(this)">答えを見る</button>
-      <div class="answer-area">
-        <div class="answer-label">こたえ</div>
-        <div class="answer-text">
-          PREP法 → <strong>P（結論）→ R（理由）→ E（具体例）→ P（再結論）</strong><br><br>
-          4原則 → <strong>①1文1メッセージ ②接続詞を8割削る ③修飾語を削る ④能動態で書く</strong>
-        </div>
-        <div class="answer-point">上司の時間を奪わないため＆後回しにされないために圧縮する！</div>
-      </div>
-      <div class="check-area">
-        <button class="check-btn correct" onclick="check(this, true)">できた！</button>
-        <button class="check-btn wrong" onclick="check(this, false)">もう一回復習する</button>
-      </div>
-    </div>
-
-    <!-- Q6 -->
-    <div class="q-card" data-q="6">
-      <div class="q-header">
-        <span class="q-num">Q6</span>
-        <span class="q-theme">✅ アクション返答</span>
-      </div>
-      <div class="q-text">上司に仕事を頼まれたとき、「了解しました」の返事に必要な3要素は？</div>
-      <button class="reveal-btn" onclick="reveal(this)">答えを見る</button>
-      <div class="answer-area">
-        <div class="answer-label">こたえ</div>
-        <div class="answer-text">
-          <strong>①何の件か ②承知しました ③何をいつまでにするか</strong><br><br>
-          例：「アンケート集計の件、承知しました。<strong>本日18時までに</strong>集計してお送りします。」
-        </div>
-        <div class="answer-point">「承知しました」だけだと上司が「いつ届くの？」と追加確認する羽目に…</div>
-      </div>
-      <div class="check-area">
-        <button class="check-btn correct" onclick="check(this, true)">できた！</button>
-        <button class="check-btn wrong" onclick="check(this, false)">もう一回復習する</button>
-      </div>
-    </div>
-
-    <!-- Q7 -->
-    <div class="q-card" data-q="7">
-      <div class="q-header">
-        <span class="q-num">Q7</span>
-        <span class="q-theme">📐 20%ルール</span>
-      </div>
-      <div class="q-text">骨子の3要素は？ 手戻りを防ぐための3ステップも答えてみよう。</div>
-      <button class="reveal-btn" onclick="reveal(this)">答えを見る</button>
-      <div class="answer-area">
-        <div class="answer-label">こたえ</div>
-        <div class="answer-text">
-          骨子の3要素 → <strong>タイトル・結論・構成</strong><br><br>
-          3ステップ → <strong>①骨子を先に作る ②方向性確認を依頼する ③合意後に作り込む</strong>
-        </div>
-        <div class="answer-point">100%作ってから見せるのはリスク大！20%の段階で方向性を確認しよう</div>
-      </div>
-      <div class="check-area">
-        <button class="check-btn correct" onclick="check(this, true)">できた！</button>
-        <button class="check-btn wrong" onclick="check(this, false)">もう一回復習する</button>
-      </div>
-    </div>
-
-    <!-- Q8 -->
-    <div class="q-card" data-q="8">
-      <div class="q-header">
-        <span class="q-num">Q8</span>
-        <span class="q-theme">🤔 仮説付き質問</span>
-      </div>
-      <div class="q-text">仮説付き質問の3つの型と、それぞれの「口癖」を言えるかな？</div>
-      <button class="reveal-btn" onclick="reveal(this)">答えを見る</button>
-      <div class="answer-area">
-        <div class="answer-label">こたえ</div>
-        <div class="answer-text">
-          <strong>①検証型</strong> →「私はAだと思うのですが、合っていますか？」<br>
-          <strong>②比較提示型</strong> →「BとCで迷っています。〇〇の理由でBが良いと思いますが…」<br>
-          <strong>③根拠参照型</strong> →「資料の△△に基づき、今回も適用可能と考えますが？」
-        </div>
-        <div class="answer-point">相手がYes/Noで答えられる形にするのがコツ！</div>
-      </div>
-      <div class="check-area">
-        <button class="check-btn correct" onclick="check(this, true)">できた！</button>
-        <button class="check-btn wrong" onclick="check(this, false)">もう一回復習する</button>
-      </div>
-    </div>
-
-    <!-- Q9 -->
-    <div class="q-card" data-q="9">
-      <div class="q-header">
-        <span class="q-num">Q9</span>
-        <span class="q-theme">🙏 相手の立場を想像した依頼</span>
-      </div>
-      <div class="q-text">誰かに何かをお願いするとき、依頼文に必要な4要素は？</div>
-      <button class="reveal-btn" onclick="reveal(this)">答えを見る</button>
-      <div class="answer-area">
-        <div class="answer-label">こたえ</div>
-        <div class="answer-text">
-          <strong>①専門性への敬意</strong>（なぜあなたに頼むのか）<br>
-          <strong>②主導権の譲渡</strong>（日程の調整余地を持たせる）<br>
-          <strong>③断る余地</strong>（「繁忙期が終わってからでも構いません」など）<br>
-          <strong>④感謝の明文化</strong>（ちゃんとお礼を言葉にする）
-        </div>
-        <div class="answer-point">得点率34%の苦手テーマ。相手の多忙さや立場に配慮できているかがカギ！</div>
-      </div>
-      <div class="check-area">
-        <button class="check-btn correct" onclick="check(this, true)">できた！</button>
-        <button class="check-btn wrong" onclick="check(this, false)">もう一回復習する</button>
-      </div>
-    </div>
-
-    <!-- Q10 -->
-    <div class="q-card" data-q="10">
-      <div class="q-header">
-        <span class="q-num">Q10</span>
-        <span class="q-theme">📣 報連相の技術</span>
-      </div>
-      <div class="q-text">報連相の「第一声」で何をすべき？<br>理想の報連相メッセージに必要な3要素は？</div>
-      <button class="reveal-btn" onclick="reveal(this)">答えを見る</button>
-      <div class="answer-area">
-        <div class="answer-label">こたえ</div>
-        <div class="answer-text">
-          第一声 → <strong>「報告/連絡/相談」のどれかを宣言する</strong><br><br>
-          3要素 → <strong>①種別宣言 ②結論ファースト ③自分なりの仮説を添える</strong><br><br>
-          NG → 丸投げ相談（「どうしたらいいですか？」）
-        </div>
-        <div class="answer-point">「ご相談です。〇〇と考えていますがいかがですか？」の形がベスト！</div>
-      </div>
-      <div class="check-area">
-        <button class="check-btn correct" onclick="check(this, true)">できた！</button>
-        <button class="check-btn wrong" onclick="check(this, false)">もう一回復習する</button>
-      </div>
-    </div>
-
-    <!-- Q11 -->
-    <div class="q-card" data-q="11">
-      <div class="q-header">
-        <span class="q-num">Q11</span>
-        <span class="q-theme">🚨 バッドニュース15分ルール</span>
-      </div>
-      <div class="q-text">一次報告テンプレートの4要素は？<br>（みんなの得点率26%、一番むずかしかった問題！）</div>
-      <button class="reveal-btn" onclick="reveal(this)">答えを見る</button>
-      <div class="answer-area">
-        <div class="answer-label">こたえ</div>
-        <div class="answer-text">
-          <strong>①状況</strong>（今何が起きているか）<br>
-          <strong>②原因</strong>（なぜ起きたか）<br>
-          <strong>③経過</strong>（これまでの対応）<br>
-          <strong>④対応案</strong>（これからどうするか）<br><br>
-          冒頭で<strong>「バッドニュースの報告です」</strong>と宣言 ＋ <strong>15分以内</strong>に報告！
-        </div>
-        <div class="answer-point">「すぐ報告する」は書けても4要素が出てこない人がほとんどだった。ここは確実に覚えよう！</div>
-      </div>
-      <div class="check-area">
-        <button class="check-btn correct" onclick="check(this, true)">できた！</button>
-        <button class="check-btn wrong" onclick="check(this, false)">もう一回復習する</button>
-      </div>
-    </div>
-
-    <!-- Q12 -->
-    <div class="q-card" data-q="12">
-      <div class="q-header">
-        <span class="q-num">Q12</span>
-        <span class="q-theme">🎯 ネクストアクション</span>
-      </div>
-      <div class="q-text">ネクストアクション（NA）の4要素を答えてみよう。</div>
-      <button class="reveal-btn" onclick="reveal(this)">答えを見る</button>
-      <div class="answer-area">
-        <div class="answer-label">こたえ</div>
-        <div class="answer-text">
-          <strong>①Who</strong>（誰が）<br>
-          <strong>②When</strong>（いつまでに）<br>
-          <strong>③What</strong>（何を）<br>
-          <strong>④Done条件</strong>（何をもって完了とするか）
-        </div>
-        <div class="answer-point">「次回までに進捗共有」→ NG！「Mさんが4/15 17:00までにデザイン案をSlackに投稿し、全員からOKを得る」→ OK！</div>
-      </div>
-      <div class="check-area">
-        <button class="check-btn correct" onclick="check(this, true)">できた！</button>
-        <button class="check-btn wrong" onclick="check(this, false)">もう一回復習する</button>
-      </div>
-    </div>
-
-    <!-- Q13 -->
-    <div class="q-card" data-q="13">
-      <div class="q-header">
-        <span class="q-num">Q13</span>
-        <span class="q-theme">🪞 振り返りの技術</span>
-      </div>
-      <div class="q-text">振り返りに必要な4要素は？<br>また、絶対に使ってはいけないNGワードは？</div>
-      <button class="reveal-btn" onclick="reveal(this)">答えを見る</button>
-      <div class="answer-area">
-        <div class="answer-label">こたえ</div>
-        <div class="answer-text">
-          4要素 →<br>
-          <strong>①問題点指摘</strong>（何がうまくいかなかったか）<br>
-          <strong>②Why分析</strong>（なぜうまくいかなかったか）<br>
-          <strong>③因数分解</strong>（量の問題か質の問題か）<br>
-          <strong>④具体トライ</strong>（来週何をどうするか）<br><br>
-          NGワード → <strong>「頑張る」「しっかり」「気をつける」</strong>
-        </div>
-        <div class="answer-point">NGワードを使うと原因が特定できず、同じ失敗を繰り返しちゃう</div>
-      </div>
-      <div class="check-area">
-        <button class="check-btn correct" onclick="check(this, true)">できた！</button>
-        <button class="check-btn wrong" onclick="check(this, false)">もう一回復習する</button>
-      </div>
-    </div>
-
-    <!-- Q14 -->
-    <div class="q-card" data-q="14">
-      <div class="q-header">
-        <span class="q-num">Q14</span>
-        <span class="q-theme">🚀 「新卒」を脱ぎ捨てる</span>
-      </div>
-      <div class="q-text">「受け身はまずい」のはなぜ？<br>TOKIUMの組織特性に触れて説明してみよう。</div>
-      <button class="reveal-btn" onclick="reveal(this)">答えを見る</button>
-      <div class="answer-area">
-        <div class="answer-label">こたえ</div>
-        <div class="answer-text">
-          TOKIUMは「<strong>スピード100で走りながら整える</strong>」組織。<strong>不確実な環境で自分から動き出す力</strong>が求められるため、100%整うのを待つ受け身姿勢では配属初日に止まってしまう。
-        </div>
-        <div class="answer-point">「他責はダメ」だけだと不十分。TOKIUMの組織特性（走りながら整える＋不確実な環境）に触れよう！</div>
-      </div>
-      <div class="check-area">
-        <button class="check-btn correct" onclick="check(this, true)">できた！</button>
-        <button class="check-btn wrong" onclick="check(this, false)">もう一回復習する</button>
-      </div>
-    </div>
-
-    <!-- Q15 -->
-    <div class="q-card" data-q="15">
-      <div class="q-header">
-        <span class="q-num">Q15</span>
-        <span class="q-theme">🔥 食らいつく精神</span>
-      </div>
-      <div class="q-text">次のケース、「回避型」と「食らいつき型」どっち？<br>A. 会議中に黙って後でこっそり調べた<br>B. テストの間違いをその日のうちにメモなしで確認した</div>
-      <button class="reveal-btn" onclick="reveal(this)">答えを見る</button>
-      <div class="answer-area">
-        <div class="answer-label">こたえ</div>
-        <div class="answer-text">
-          A. → <strong>回避型</strong>（その場で聞くべき！後で調べても会議中のズレは取り返せない）<br><br>
-          B. → <strong>食らいつき型</strong>（アクティブリコールの実践。間違いをその日のうちに潰してる！）
-        </div>
-        <div class="answer-point">「次回がんばろう」も回避型。いつ・何をするか決まってないと食らいつけてない！</div>
-      </div>
-      <div class="check-area">
-        <button class="check-btn correct" onclick="check(this, true)">できた！</button>
-        <button class="check-btn wrong" onclick="check(this, false)">もう一回復習する</button>
-      </div>
-    </div>
-
-    <!-- Q16 -->
-    <div class="q-card" data-q="16">
-      <div class="q-header">
-        <span class="q-num">Q16</span>
-        <span class="q-theme">🤝 他者を動かす</span>
-      </div>
-      <div class="q-text">「やり方に不満がある」とき、愚痴で終わらせず行動に変える3ステップは？</div>
-      <button class="reveal-btn" onclick="reveal(this)">答えを見る</button>
-      <div class="answer-area">
-        <div class="answer-label">こたえ</div>
-        <div class="answer-text">
-          <strong>①WHYを理解する</strong>（まず「なぜこうしているのか」を相手に聞く）<br>
-          <strong>②空雨傘で構造化する</strong>（問題と改善案を整理して伝える）<br>
-          <strong>③小さく始める</strong>（いきなり全部変えずに、まず1ヶ月データを取ってみる）
-        </div>
-        <div class="answer-point">愚痴は行動を伴わない。動かなければ何も変わらない！</div>
-      </div>
-      <div class="check-area">
-        <button class="check-btn correct" onclick="check(this, true)">できた！</button>
-        <button class="check-btn wrong" onclick="check(this, false)">もう一回復習する</button>
-      </div>
-    </div>
-
-    <!-- Q17 -->
-    <div class="q-card" data-q="17">
-      <div class="q-header">
-        <span class="q-num">Q17</span>
-        <span class="q-theme">⏩ 前/後ろの行動</span>
-      </div>
-      <div class="q-text">次のケース、チームを「前に進める」行動？「後ろに引っ張る」行動？<br>A. データに基づいてリスクを指摘した<br>B. 他のタスクがあるのに引き受けて遅延した<br>C. 懸念があったけど黙っていてトラブルになった</div>
-      <button class="reveal-btn" onclick="reveal(this)">答えを見る</button>
-      <div class="answer-area">
-        <div class="answer-label">こたえ</div>
-        <div class="answer-text">
-          A. → <strong>前に進める</strong>（データに基づく指摘はチームの判断の質を上げる！）<br><br>
-          B. → <strong>後ろに引っ張る</strong>（引き受ける前に優先順位を確認すべき）<br><br>
-          C. → <strong>後ろに引っ張る</strong>（懸念を共有しないと、チームの判断に必要な情報が欠ける）
-        </div>
-        <div class="answer-point">判定が分かれるケースもある。「前」「後ろ」どちらでも理由が合理的であればOK！</div>
-      </div>
-      <div class="check-area">
-        <button class="check-btn correct" onclick="check(this, true)">できた！</button>
-        <button class="check-btn wrong" onclick="check(this, false)">もう一回復習する</button>
-      </div>
-    </div>
-
   </div>
 
-  <!-- Result -->
-  <div class="result-area" id="result-area">
-    <div class="result-emoji" id="result-emoji"></div>
-    <div class="result-msg" id="result-msg"></div>
-    <div class="result-sub" id="result-sub"></div>
-    <a href="review.html" class="retry-btn">復習ノートで確認する</a>
-    <button class="retry-btn" onclick="location.reload()" style="margin-left:8px; background:linear-gradient(135deg,#ffab91,#ff7043);">もう一回やる！</button>
+  <div class="history-section">
+    <h3>これまでの記録</h3>
+    <div id="history-list"></div>
   </div>
+</div>
 
-  <script>
-    var total = 17;
-    var correctCount = 0;
-    var answeredCount = 0;
+<!-- ========== QUIZ SCREEN ========== -->
+<div id="screen-quiz" class="quiz-screen hidden">
+  <div class="progress-board">
+    <div class="progress-top">
+      <span class="progress-label" id="quiz-level-label"></span>
+      <span style="display:flex; align-items:center; gap:10px;">
+        <span class="progress-count" id="quiz-progress-text">1 / 10</span>
+        <button class="quit-btn" onclick="quitQuiz()">中止</button>
+      </span>
+    </div>
+    <div class="progress-bar-outer"><div class="progress-bar-inner" id="quiz-progress-bar"></div></div>
+  </div>
+  <div id="quiz-body"></div>
+</div>
 
-    function reveal(btn) {
-      if (btn.classList.contains('revealed')) return;
-      btn.classList.add('revealed');
-      btn.textContent = '答えを表示中';
-      var card = btn.closest('.q-card');
-      card.querySelector('.answer-area').classList.add('show');
-      card.querySelector('.check-area').classList.add('show');
+<!-- ========== QUIT MODAL ========== -->
+<div id="quit-modal" class="modal-overlay hidden" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <h3>クイズを中止する？</h3>
+    <div class="modal-sub">途中までの結果を記録に残すか選べるよ</div>
+    <div class="modal-score" id="modal-score-preview"></div>
+    <div class="modal-actions">
+      <button class="mbtn-save" onclick="confirmQuit(true)">結果を残して終了</button>
+      <button class="mbtn-discard" onclick="confirmQuit(false)">結果を消して終了</button>
+      <button class="mbtn-cancel" onclick="closeModal()">続ける</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== RESULT SCREEN ========== -->
+<div id="screen-result" class="result-screen hidden">
+  <div class="result-card">
+    <div class="result-emoji" id="r-emoji"></div>
+    <div class="result-score" id="r-score"></div>
+    <div class="result-msg" id="r-msg"></div>
+    <div class="result-comparison" id="r-compare"></div>
+  </div>
+  <div class="weak-section">
+    <h3>苦手テーマ</h3>
+    <div id="r-weak"></div>
+  </div>
+  <div class="result-actions">
+    <button class="btn-retry" onclick="retryQuiz()">同じレベルで再挑戦</button>
+    <button class="btn-home" onclick="goHome()">レベル選択に戻る</button>
+  </div>
+</div>
+
+<script>
+// ─── Question Bank ───
+var QUESTIONS = [
+
+  // ============ LEVEL 1 : 基礎チェック (19問) ============
+  {theme:1,emoji:"🏠",themeName:"研修の根本",level:1,
+   q:"「仕事」の定義として正しいものはどれ？",
+   c:["お金を稼ぐこと","ステークホルダーを安心させること","上司の指示を完遂すること","自分のスキルを伸ばすこと"],
+   a:1, ex:"仕事とは<strong>ステークホルダーを安心させること</strong>。信頼残高を貯める行動の積み重ねが大事！"},
+
+  {theme:1,emoji:"🏠",themeName:"研修の根本",level:1,
+   q:"目指す人物像の4要素として正しい組み合わせは？",
+   c:["「3年後に」「チームを率いる」「高い意識を持つ」「マネージャー」",
+      "「5年後に」「組織を牽引する」「異常な情熱を持つ」「リーダー」",
+      "「10年後に」「会社を牽引する」「強い意志を持つ」「リーダー」",
+      "「5年後に」「チームを牽引する」「異常な情熱を持つ」「マネージャー」"],
+   a:1, ex:"4要素は<strong>「5年後に」「組織を牽引する」「異常な情熱を持つ」「リーダー」</strong>。「5年後」と「組織を牽引」が抜けやすいポイント！"},
+
+  {theme:2,emoji:"💪",themeName:"6動詞",level:1,
+   q:"6つの動詞に含まれないものはどれ？",
+   c:["学ぶ","書く","考える","巻き込む"],
+   a:2, ex:"6動詞は<strong>学ぶ・聴く・読む・書く・話す・巻き込む</strong>。「考える」は含まれない！"},
+
+  {theme:2,emoji:"💪",themeName:"6動詞",level:1,
+   q:"「学ぶ」の定義として正しいものは？",
+   c:["たくさんの本を読んで知識を蓄えること",
+      "教わったことを翌日、自力で100%再現できること",
+      "先輩の行動を観察して真似すること",
+      "研修のメモを丁寧にとること"],
+   a:1, ex:"「学ぶ」＝<strong>教わったことを翌日、自力で100%再現できること</strong>。「100%再現」がキーワード！"},
+
+  {theme:3,emoji:"☂️",themeName:"空・雨・傘",level:1,
+   q:"空・雨・傘の「雨」が表すものは？",
+   c:["事実","データ","解釈","提案"],
+   a:2, ex:"空＝事実、<strong>雨＝解釈</strong>（事実から読み取れること）、傘＝提案。"},
+
+  {theme:4,emoji:"🔍",themeName:"具体と抽象",level:1,
+   q:"行動を書くときに使ってはいけないNGワードは？",
+   c:["「確認する」","「意識する」","「報告する」","「記録する」"],
+   a:1, ex:"<strong>「意識する」「気をつける」</strong>は曖昧で動けないNGワード。「誰が・いつまでに・何を」で具体的に！"},
+
+  {theme:5,emoji:"✍️",themeName:"簡潔にロジカル",level:1,
+   q:"PREP法の「R」は何を表す？",
+   c:["Result（結果）","Reason（理由）","Review（振り返り）","Report（報告）"],
+   a:1, ex:"PREP＝<strong>P(結論)→R(理由)→E(具体例)→P(再結論)</strong>。Rは Reason（理由）！"},
+
+  {theme:6,emoji:"✅",themeName:"アクション返答",level:1,
+   q:"アクション返答の3要素に含まれないものは？",
+   c:["何の件か","承知の言葉","感謝の言葉","何をいつまでにするか"],
+   a:2, ex:"3要素は<strong>①何の件か ②承知の言葉 ③何をいつまでにするか</strong>。感謝は大事だけど3要素には含まれない。"},
+
+  {theme:7,emoji:"📐",themeName:"20%ルール",level:1,
+   q:"骨子の3要素として正しいものは？",
+   c:["問題・原因・対策","タイトル・結論・構成","目的・方法・結果","課題・提案・効果"],
+   a:1, ex:"骨子の3要素は<strong>タイトル・結論・構成</strong>。これが揃えば「合ってますか？」が聞ける状態！"},
+
+  {theme:8,emoji:"🤔",themeName:"仮説付き質問",level:1,
+   q:"仮説付き質問の3つの型に含まれないものは？",
+   c:["検証型","比較提示型","根拠参照型","感情共感型"],
+   a:3, ex:"3つの型は<strong>検証型・比較提示型・根拠参照型</strong>。「感情共感型」は存在しない。"},
+
+  {theme:9,emoji:"🙏",themeName:"相手の立場を想像した依頼",level:1,
+   q:"依頼文に必要な4要素に含まれないものは？",
+   c:["専門性への敬意","主導権の譲渡","作業手順の指示","感謝の明文化"],
+   a:2, ex:"4要素は<strong>①専門性への敬意 ②主導権の譲渡 ③断る余地 ④感謝の明文化</strong>。作業手順の指示は含まれない。"},
+
+  {theme:10,emoji:"📣",themeName:"報連相の技術",level:1,
+   q:"報連相の第一声で最も大切なことは？",
+   c:["お詫びの言葉を述べる","報告・連絡・相談のどれかを宣言する","自分の名前を名乗る","相手の都合を確認する"],
+   a:1, ex:"第一声で<strong>「報告/連絡/相談」のどれかを宣言する</strong>。相手の聞く準備が変わる！"},
+
+  {theme:11,emoji:"🚨",themeName:"バッドニュース15分ルール",level:1,
+   q:"バッドニュースの一次報告テンプレートの4要素は？",
+   c:["状況・原因・経過・対応案","事実・解釈・提案・期限","問題・影響・原因・再発防止","報告・連絡・相談・確認"],
+   a:0, ex:"4要素は<strong>①状況 ②原因 ③経過 ④対応案</strong>。冒頭で「バッドニュースの報告です」と宣言するのも忘れずに！"},
+
+  {theme:12,emoji:"🎯",themeName:"ネクストアクション",level:1,
+   q:"ネクストアクション（NA）の4要素に含まれないものは？",
+   c:["Who（誰が）","When（いつまでに）","Why（なぜ）","Done条件（完了基準）"],
+   a:2, ex:"NAの4要素は<strong>Who / When / What / Done条件</strong>。Whyは含まれない。"},
+
+  {theme:13,emoji:"🪞",themeName:"振り返りの技術",level:1,
+   q:"振り返りのNGワードはどれ？",
+   c:["「次回は手順を変えて試す」","「頑張る」","「量を2倍に増やす」","「確認回数を1回追加する」"],
+   a:1, ex:"<strong>「頑張る」「しっかり」「気をつける」</strong>はNGワード。原因が特定できず、同じ失敗を繰り返す。"},
+
+  {theme:14,emoji:"🚀",themeName:"新卒を脱ぐ",level:1,
+   q:"TOKIUMの組織特性として正しいものは？",
+   c:["慎重に計画してから実行する組織","スピード100で走りながら整える組織","トップダウンで指示に従う組織","専門性を極めて個人で成果を出す組織"],
+   a:1, ex:"TOKIUMは<strong>「スピード100で走りながら整える」</strong>組織。不確実な環境で自分から動き出す力が必要！"},
+
+  {theme:15,emoji:"🔥",themeName:"食らいつく精神",level:1,
+   q:"「回避型」の行動はどれ？",
+   c:["テストの間違いをその日のうちに確認した","会議中にわからないことをその場で質問した","会議中に黙って後でこっそり調べた","失敗の原因を分析してノートにまとめた"],
+   a:2, ex:"会議中に黙って後で調べるのは<strong>回避型</strong>。その場で聞くべき！後で調べてもズレは取り返せない。"},
+
+  {theme:16,emoji:"🤝",themeName:"他者を動かす",level:1,
+   q:"他者を動かすための3ステップに含まれないのは？",
+   c:["相手のWHYを理解する","問題と提案をセットで持っていく","大きな変革を一気に求める","小さく始めて実績を作る"],
+   a:2, ex:"3ステップは<strong>①WHYを理解 ②問題＋提案セット ③小さく始める</strong>。いきなり大きな変革は通らない！"},
+
+  {theme:17,emoji:"⏩",themeName:"前/後ろの行動",level:1,
+   q:"チームを「後ろに引っ張る行動」はどれ？",
+   c:["データに基づいてリスクを指摘し、代替案を添えた","懸念があったが黙っていてトラブルになった","締切2日前に進捗と残課題を報告した","意見が割れた時に判断基準の整理を提案した"],
+   a:1, ex:"懸念を共有しないとチームの判断に必要な情報が欠ける。<strong>黙っている＝後ろに引っ張る行動</strong>。"},
+
+  // ============ LEVEL 2 : 応用チャレンジ (18問) ============
+  {theme:1,emoji:"🏠",themeName:"研修の根本",level:2,
+   q:"信頼残高について正しい記述はどれ？",
+   c:["大きな成果を1回出せば一気に貯まり、減りにくい",
+      "行動様式の積み重ねで決まり、失うのは一瞬（バケツの穴）",
+      "上司との関係だけに適用される概念",
+      "信頼残高が高ければ、多少のミスは報告しなくてよい"],
+   a:1, ex:"信頼残高は<strong>行動様式の積み重ね</strong>で決まる。バケツの穴のように、失うのは一瞬！"},
+
+  {theme:2,emoji:"💪",themeName:"6動詞",level:2,
+   q:"「書く」の定義として最も正確なものは？",
+   c:["文法的に正しい日本語で文章を作成すること",
+      "読み手が最小限の時間で理解し、次の行動に移せる文章を書くこと",
+      "自分の考えを正確に言語化すること",
+      "報告書やメールを素早く作成すること"],
+   a:1, ex:"「書く」＝<strong>読み手が最小限の時間で理解し、次の行動に移せる文章を書くこと</strong>。読み手視点がポイント！"},
+
+  {theme:3,emoji:"☂️",themeName:"空・雨・傘",level:2,
+   q:"「A社の売上が下がっていてヤバいので何かしたいです」はどの失敗パターン？",
+   c:["事実だけ型","傘だけ型","混在型","構造は合っている"],
+   a:2, ex:"事実・解釈・提案が混ざっている<strong>混在型</strong>。上司が「何が事実で何が感想？」と聞き返すパターン。"},
+
+  {theme:3,emoji:"☂️",themeName:"空・雨・傘",level:2,
+   q:"「雲が多く、雨が降りそうだ」を空雨傘で分けると「雨が降りそうだ」はどの層の問題？",
+   c:["空（事実）に含めてOK","雨（解釈）として分離すべき","傘（提案）の一部","そもそも報告に含めない"],
+   a:1, ex:"「雲が多い」が空（事実）、「雨が降りそうだ」は<strong>雨（解釈）として分離すべき</strong>。事実に推測を混ぜない！"},
+
+  {theme:4,emoji:"🔍",themeName:"具体と抽象",level:2,
+   q:"「動ける粒度」の行動として最も適切なのは？",
+   c:["もっと集中して取り組む",
+      "コミュニケーションを改善する",
+      "明日から会議のたびにノートを開いて決定事項を1行ずつ記録する",
+      "来月からタスク管理を意識する"],
+   a:2, ex:"<strong>「明日から会議のたびにノートを開いて決定事項を1行ずつ記録する」</strong>＝誰が・いつまでに・何をが明確。"},
+
+  {theme:5,emoji:"✍️",themeName:"簡潔にロジカル",level:2,
+   q:"文章を短くする4原則に含まれないものは？",
+   c:["1文1メッセージ","接続詞を8割削る","専門用語を避ける","能動態で書く"],
+   a:2, ex:"4原則は<strong>①1文1メッセージ ②接続詞8割カット ③修飾語を削る ④能動態</strong>。「専門用語を避ける」は含まれない。"},
+
+  {theme:6,emoji:"✅",themeName:"アクション返答",level:2,
+   q:"以下のうち最も適切なアクション返答は？",
+   c:["「了解しました！すぐやります」",
+      "「承知しました。確認します」",
+      "「企画書の件、承知しました。明日12時までにVer.2をお送りします」",
+      "「わかりました。なるべく早くやります」"],
+   a:2, ex:"3要素が全て入っている：<strong>①何の件か（企画書）②承知 ③いつまでに何を（明日12時・Ver.2送付）</strong>"},
+
+  {theme:7,emoji:"📐",themeName:"20%ルール",level:2,
+   q:"20%ルールの壁打ちで骨子がうまく伝わらない主な原因は？",
+   c:["見た目が整っていないから","何を確認したいかが不明確だから","分量が少なすぎるから","上司が忙しいから"],
+   a:1, ex:"骨子の目的は<strong>「合ってますか？」が聞ける状態</strong>を作ること。確認ポイントが不明確だと意味がない。"},
+
+  {theme:8,emoji:"🤔",themeName:"仮説付き質問",level:2,
+   q:"仮説の強さのレベルが最も高いのは？",
+   c:["「こうかなと思うのですが…」",
+      "「A案が良いと思います。理由は〇〇です」",
+      "「Aのドキュメントでは〇〇とあったのでAだと思います。合ってますか？」",
+      "「どうしたらいいですか？」"],
+   a:2, ex:"調べた根拠を添えた仮説が<strong>最も強い</strong>。ドキュメントや資料に基づいていると説得力が段違い！"},
+
+  {theme:9,emoji:"🙏",themeName:"相手の立場を想像した依頼",level:2,
+   q:"依頼文で「主導権の譲渡」が意味するのは？",
+   c:["依頼内容の決定権を相手に全て任せること",
+      "日程の調整余地を持たせること",
+      "上司の承認を得てから依頼すること",
+      "相手に最終判断を委ねること"],
+   a:1, ex:"<strong>主導権の譲渡＝日程の調整余地を持たせる</strong>こと。「期限は〇日が理想ですが、調整可能です」の形。"},
+
+  {theme:10,emoji:"📣",themeName:"報連相の技術",level:2,
+   q:"報連相でNGな行動はどれ？",
+   c:["「ご相談です。〇〇と考えていますがいかがですか？」と聞く",
+      "結論から報告する",
+      "自分が調べた経緯を最初から詳しく説明する",
+      "「報告」か「相談」かを冒頭で宣言する"],
+   a:2, ex:"<strong>思考回路の披露はNG</strong>。相手が知りたいのは「結論」と「次に何をしてほしいか」だけ。"},
+
+  {theme:11,emoji:"🚨",themeName:"バッドニュース15分ルール",level:2,
+   q:"バッドニュースの報告について正しいのは？",
+   c:["完璧な対応策を準備してから報告する",
+      "15分経ったら対応策がなくても強制的に報告する",
+      "まず同僚に相談してから上司に報告する",
+      "メールで詳細な経緯を書いて報告する"],
+   a:1, ex:"<strong>15分経ったら強制報告</strong>！完璧な対応策は不要。「現在調査中」でもOK。早さが最大の価値。"},
+
+  {theme:12,emoji:"🎯",themeName:"ネクストアクション",level:2,
+   q:"適切なネクストアクションはどれ？",
+   c:["「次回までに進捗を共有する」",
+      "「Mさんが4/15 17:00までにデザイン案をSlackに投稿し、全員からOKを得る」",
+      "「できるだけ早く対応する」",
+      "「チーム全体で頑張る」"],
+   a:1, ex:"<strong>Who(Mさん) / When(4/15 17:00) / What(デザイン案投稿) / Done(全員OK)</strong>が全部入ってる！"},
+
+  {theme:13,emoji:"🪞",themeName:"振り返りの技術",level:2,
+   q:"振り返りの4要素に含まれないものは？",
+   c:["問題点指摘","Why分析","感情の整理","因数分解（量か質か）"],
+   a:2, ex:"4要素は<strong>①問題点指摘 ②Why分析 ③因数分解 ④具体トライ</strong>。「感情の整理」は含まれない。"},
+
+  {theme:15,emoji:"🔥",themeName:"食らいつく精神",level:2,
+   q:"「食らいつき型」の行動の特徴として正しいのは？",
+   c:["失敗しても「次回がんばろう」と前向きに考える",
+      "いつ・何をするかを決めて、その日のうちに行動する",
+      "できないことは人に任せて効率化する",
+      "ミスを受け入れて気持ちを切り替える"],
+   a:1, ex:"<strong>いつ・何をするかを決めて即行動</strong>が食らいつき型。「次回がんばろう」は回避型！"},
+
+  {theme:16,emoji:"🤝",themeName:"他者を動かす",level:2,
+   q:"「嘆く」行動と「変える」行動の違いとして正しいのは？",
+   c:["嘆く＝問題を認識する、変える＝上司に不満を伝える",
+      "嘆く＝受け身で不満を言う、変える＝能動的に改善提案する",
+      "嘆く＝感情的になる、変える＝冷静に分析する",
+      "嘆く＝個人の問題、変える＝チームの問題"],
+   a:1, ex:"<strong>嘆く＝受け身、変える＝能動的に改善提案</strong>。行動を伴わなければ何も変わらない！"},
+
+  {theme:17,emoji:"⏩",themeName:"前/後ろの行動",level:2,
+   q:"「リスクがあると思います」だけの発言がチームを後ろに引っ張る理由は？",
+   c:["リスクの指摘自体が不適切だから",
+      "代替案がないので議論が止まるから",
+      "チームの雰囲気を壊すから",
+      "上司の判断を否定しているから"],
+   a:1, ex:"リスク指摘は重要！問題は<strong>代替案がないので議論が止まる</strong>こと。懸念＋代替案＝前に進める行動。"},
+
+  {theme:14,emoji:"🚀",themeName:"新卒を脱ぐ",level:2,
+   q:"「受け身がまずい」理由として最も適切なのは？",
+   c:["上司に怒られるから",
+      "不確実な環境で自分から動き出す力が求められるため、受け身では配属初日に止まるから",
+      "他の同期に遅れをとるから",
+      "研修の評価が下がるから"],
+   a:1, ex:"TOKIUMは「走りながら整える」組織。<strong>不確実な環境で自分から動く力</strong>がないと止まってしまう。"},
+
+  // ============ LEVEL 3 : 実践マスター (17問4択 + 6問記述) ============
+
+  // ── 記述問題 ──
+  {theme:1,emoji:"🏠",themeName:"研修の根本",level:3,type:"text",
+   q:"「仕事とは何ですか？」を一言で答え、さらに「目指す人物像」を書いてください。",
+   keywords:["ステークホルダー","安心","5年後","組織","牽引","異常","情熱","リーダー"],
+   minHit:5,
+   ex:"仕事＝<strong>ステークホルダーを安心させること</strong>。人物像＝<strong>「5年後に」「組織を牽引する」「異常な情熱を持つ」「リーダー」</strong>の4要素。"},
+
+  {theme:3,emoji:"☂️",themeName:"空・雨・傘",level:3,type:"text",
+   q:"A社の今月のシステム利用率が先月比で10%下がっている状況を、上司に空・雨・傘で報告してください。",
+   keywords:["利用率","10%","下","事実","解釈","原因","提案","いつまで"],
+   minHit:4,
+   ex:"<strong>空</strong>（事実）→利用率が10%低下。<strong>雨</strong>（解釈）→担当者変更等の原因仮説。<strong>傘</strong>（提案）→「何を」「いつまでに」を含むアクション。"},
+
+  {theme:11,emoji:"🚨",themeName:"バッドニュース15分ルール",level:3,type:"text",
+   q:"ミスに気づいた！一次報告テンプレートの4要素を使って、上司への第一報を書いてください。",
+   keywords:["状況","原因","経過","対応案","15分","バッドニュース","報告"],
+   minHit:4,
+   ex:"テンプレート4要素＝<strong>①状況 ②原因 ③経過 ④対応案</strong>。冒頭で「バッドニュースの報告です」と宣言＋15分以内に報告！"},
+
+  {theme:6,emoji:"✅",themeName:"アクション返答",level:3,type:"text",
+   q:"上司に「来週の会議資料をまとめておいて」と頼まれました。アクション返答の3要素を使って返事を書いてください。",
+   keywords:["件","承知","いつ","まで"],
+   minHit:3,
+   ex:"3要素＝<strong>①何の件か ②承知の言葉 ③何をいつまでにするか</strong>。例：「会議資料の件、承知しました。金曜17時までに骨子を共有します。」"},
+
+  {theme:13,emoji:"🪞",themeName:"振り返りの技術",level:3,type:"text",
+   q:"先週のプレゼンで失敗した場面を想定して、振り返りの4要素（問題点→Why→因数分解→具体トライ）で書いてください。",
+   keywords:["問題","なぜ","量","質","具体","いつ","何を"],
+   minHit:3,
+   ex:"4要素＝<strong>①問題点指摘 ②Why分析 ③因数分解（量か質か）④具体トライ</strong>。「頑張る」「気をつける」はNGワード！"},
+
+  {theme:12,emoji:"🎯",themeName:"ネクストアクション",level:3,type:"text",
+   q:"ネクストアクション（NA）を決めるときに必要な4つの要素は何ですか？それぞれ説明してください。",
+   keywords:["Who","誰","When","いつ","What","何","Done","完了","条件","基準"],
+   minHit:4,
+   ex:"NA 4要素＝<strong>Who(誰が) / When(いつまでに) / What(何を) / Done条件(何をもって完了か)</strong>。「次回までに進捗共有」のような曖昧なものはNG！"},
+
+  // ── 4択問題（既存） ──
+  {theme:3,emoji:"☂️",themeName:"空・雨・傘",level:3,
+   q:"CS担当のあなた。C社のログイン率が80%→45%に低下、担当者が異動、後任から基本操作の問い合わせが2回。上司への報告で「空（事実）」として不適切なのは？",
+   c:["「C社のログイン率が先月比で35%低下しました」",
+      "「担当者の異動が原因でログイン率が下がっています」",
+      "「後任の佐藤さんから基本操作の問い合わせが2回ありました」",
+      "「C社の契約更新は3ヶ月後です」"],
+   a:1, ex:"「異動が<strong>原因で</strong>」は解釈（雨）が混入している。空には主観ゼロの事実だけを書く！"},
+
+  {theme:11,emoji:"🚨",themeName:"バッドニュース15分ルール",level:3,
+   q:"金曜16時、極秘レポートを競合C社に誤送信してしまった。上司は同じフロアで作業中。最も適切な対応は？",
+   c:["Slackで状況・原因・経過・対応案を整理して報告する",
+      "上司の席に直接行き、口頭でバッドニュースの報告をする",
+      "まずC社に連絡してメールの削除を依頼してから報告する",
+      "詳しく調べて完璧な対応策を作ってから報告する"],
+   a:1, ex:"情報漏洩は<strong>今すぐ対応しないと致命的</strong>なケース。文面より<strong>口頭で最速報告</strong>！自己解決を試みるのはNG。"},
+
+  {theme:6,emoji:"✅",themeName:"アクション返答",level:3,
+   q:"上司から「来週の定例で使う資料を作って」と言われた。最も適切な返答は？",
+   c:["「承知しました」",
+      "「はい、作ります」",
+      "「定例資料の件、承知しました。金曜17時までに骨子を共有し、方向性確認後に作り込みます」",
+      "「わかりました。月曜の朝までに完成させます」"],
+   a:2, ex:"<strong>①何の件か ②承知 ③いつまでに何を</strong>に加えて、20%ルール（骨子で方向性確認）まで盛り込んだ完璧な返答！"},
+
+  {theme:10,emoji:"📣",themeName:"報連相の技術",level:3,
+   q:"手が止まって15分経過。仮説すら立てられない状況。最も適切な行動は？",
+   c:["もう少し自分で調べてから相談する",
+      "「どうしたらいいですか？」と上司に聞く",
+      "「ここまで調べましたが、ここから先がわかりません。ヒントをください」と現在地を明確にして相談する",
+      "同僚に相談してなんとかする"],
+   a:2, ex:"<strong>自分の現在地を明確にして即相談</strong>。丸投げ（B）はNG。でも手掛かりゼロなら意地を張らず正直に助けを求める！"},
+
+  {theme:7,emoji:"📐",themeName:"20%ルール",level:3,
+   q:"全社会議のスライドを作成することになった。20%ルールに基づく最も適切な行動は？",
+   c:["まず全スライドを完成させてから上司に見せる",
+      "デザインにこだわって見栄えよく整えてから方向性を確認する",
+      "タイトル・結論・構成の骨子を作り、方向性確認を依頼してから作り込む",
+      "過去の資料をコピーして修正する"],
+   a:2, ex:"<strong>①骨子(タイトル・結論・構成)を作る →②方向性確認 →③合意後に作り込む</strong>。完成後に見せるのはリスク大！"},
+
+  {theme:5,emoji:"✍️",themeName:"簡潔にロジカル",level:3,
+   q:"以下のSlack報告のうち、PREP法と4原則に最も沿っているのは？",
+   c:["「C社の件で報告します。先週打ち合わせをして、いくつか意見をもらって、検索機能の件と…」",
+      "「【報告】C社から改善要望2点。検索フィルタUI改善とExcel出力対応。契約更新(7月)前の回答必要。来週水曜までに開発確認後、回答予定です」",
+      "「お疲れ様です。先日C社の佐藤様と非常に有意義な打ち合わせをしまして、その中でいくつかのご要望を…」",
+      "「C社の佐藤様が困っているので、なんとかしたいと思います」"],
+   a:1, ex:"<strong>結論ファースト・1文1メッセージ・修飾語なし・能動態</strong>。必要な情報を最短で伝えている。"},
+
+  {theme:9,emoji:"🙏",themeName:"相手の立場を想像した依頼",level:3,
+   q:"他部署のエンジニアに技術レビューを依頼したい。最も適切な依頼文は？",
+   c:["「レビューお願いします。急ぎなので今日中に見てください」",
+      "「〇〇さんの技術領域のご知見が必要と考え、レビューをお願いしたいです。今週末が理想ですが、ご都合に合わせて調整可能です」",
+      "「すみません、レビューしてもらえませんか？できるだけ早くお願いします」",
+      "「上司に言われたのでレビューお願いします」"],
+   a:1, ex:"<strong>①敬意（なぜあなたに）②主導権の譲渡（調整可能）③断る余地</strong>が含まれた依頼。"},
+
+  {theme:8,emoji:"🤔",themeName:"仮説付き質問",level:3,
+   q:"Slackの通知設定を変えたい。上司への質問として最も適切なのは？",
+   c:["「Slackの通知設定ってどうするんですか？」",
+      "「Slackの通知をオフにしていいですか？」",
+      "「Slackの通知設定を変えたいのですが、プロフィールの通知設定から変更するのが正しいと思っています。合ってますか？」",
+      "「Slackの通知がうるさいです」"],
+   a:2, ex:"<strong>自分の仮説を添えてYes/Noで答えられる形</strong>にしている。丸投げの質問は相手の時間を奪う。"},
+
+  {theme:13,emoji:"🪞",themeName:"振り返りの技術",level:3,
+   q:"プレゼンで失敗した。振り返りとして最も適切なのは？",
+   c:["「次回はもっと頑張ります」",
+      "「緊張してしまったので、次は気をつけます」",
+      "「冒頭で結論を述べなかった→練習不足で構成が頭に入っていなかった→質の問題→次回は前日にPREP構成で3回リハーサルする」",
+      "「プレゼンが苦手なので、しばらく避けたいです」"],
+   a:2, ex:"<strong>問題点→Why→因数分解→具体トライ</strong>の4要素が全部入っている！「頑張る」「気をつける」はNGワード。"},
+
+  {theme:17,emoji:"⏩",themeName:"前/後ろの行動",level:3,
+   q:"チーム会議で新ツール導入を議論中。個人的に反対だがチーム全体が賛成ムード。最も「前に進める」行動は？",
+   c:["空気を読んで「いいと思います」と同意する",
+      "「反対です」と強く主張する",
+      "「〇〇というリスクがあると考えます。まず1ヶ月のトライアルから始めてはどうですか？」",
+      "黙って様子を見る"],
+   a:2, ex:"<strong>懸念＋代替案＝チームを守りながら前に進める行動</strong>。黙る・空気を読んで同意は後ろに引っ張る行動！"},
+
+  {theme:16,emoji:"🤝",themeName:"他者を動かす",level:3,
+   q:"チームの業務フローに不満がある。最も適切な行動は？",
+   c:["飲み会で同僚に愚痴を言う",
+      "まず「なぜこのフローなのか」を理解し、空雨傘で課題と改善案を整理して提案し、小さく始める",
+      "上司に「このフローは非効率です」と伝える",
+      "自分だけ違うフローで作業する"],
+   a:1, ex:"<strong>①WHY理解 ②空雨傘で構造化 ③小さく始める</strong>。愚痴は行動を伴わない。動かなければ変わらない！"},
+
+  {theme:14,emoji:"🚀",themeName:"新卒を脱ぐ",level:3,
+   q:"配属初日。マニュアルが整備されていない。最も適切な行動は？",
+   c:["マニュアルが整備されるまで待つ",
+      "「マニュアルがないので何もできません」と上司に伝える",
+      "周りの先輩に質問しながら自分で動き出し、わかったことをメモにまとめていく",
+      "同期に「整備されてないの困るよね」と愚痴を言う"],
+   a:2, ex:"<strong>不確実な環境で自分から動き出す</strong>のがTOKIUMで求められる姿勢。100%整うのを待つ受け身はNG。"},
+
+  {theme:12,emoji:"🎯",themeName:"ネクストアクション",level:3,
+   q:"会議の最後。ネクストアクションの決め方として最も適切なのは？",
+   c:["「次回までに各自で進めておきましょう」",
+      "「頑張りましょう」",
+      "「田中が水曜17時までに調査結果をSlackに投稿、佐藤が木曜12時までにデザイン案を2つ共有、金曜の定例で最終決定」",
+      "「来週また話し合いましょう」"],
+   a:2, ex:"<strong>Who/When/What/Done</strong>が全て明確。「各自で進める」「頑張る」は曖昧で動けない。"},
+
+  {theme:15,emoji:"🔥",themeName:"食らいつく精神",level:3,
+   q:"テストで3問間違えた。「食らいつき型」の行動は？",
+   c:["「次のテストで挽回しよう」と思い、普段通り過ごす",
+      "落ち込むが、友達に励ましてもらって気持ちを切り替える",
+      "その日のうちに間違えた3問をノートに書き出し、翌朝に何も見ずに解き直す",
+      "テストの範囲が広すぎたと思い、出題者に改善を求める"],
+   a:2, ex:"<strong>その日のうちに行動＋アクティブリコール(何も見ずに解き直す)</strong>＝食らいつき型の典型！"},
+
+  {theme:1,emoji:"🏠",themeName:"研修の根本",level:3,
+   q:"新人のあなた。タスクが遅れていることを報告せず、1人で残業して品質を落として提出した。この行動が信頼残高に与える影響は？",
+   c:["遅れずに提出できたので信頼残高はプラス",
+      "残業して頑張ったので評価される",
+      "品質低下＋報連相不足で信頼残高を大きく毀損する",
+      "遅延報告しないほうが上司の負担が減るのでプラス"],
+   a:2, ex:"報告なしの残業→品質低下→修正依頼→<strong>信頼残高を二重に毀損</strong>。早めの報告で上司を巻き込むべきだった！"},
+
+  {theme:2,emoji:"💪",themeName:"6動詞",level:3,
+   q:"「巻き込む」の定義として最も適切なのは？",
+   c:["全ての仕事を1人でやらず誰かに手伝ってもらうこと",
+      "必要な人・情報・リソースを、適切な順序・タイミングで能動的に引き込むこと",
+      "上司に相談してチームメンバーをアサインしてもらうこと",
+      "困ったときに周りに助けを求めること"],
+   a:1, ex:"「巻き込む」＝<strong>必要な人・情報・リソースを、適切な順序・タイミングで能動的に引き込む</strong>こと。受け身ではない！"},
+
+  {theme:4,emoji:"🔍",themeName:"具体と抽象",level:3,
+   q:"同期3人が別々のミスをした。共通の根本課題を見つける考え方として最も適切なのは？",
+   c:["3人にそれぞれ「気をつけよう」と伝える",
+      "最も重大なミスに集中して対策する",
+      "3つのミスに共通する根本原因を抽象化し、動ける粒度の具体アクションに落とす",
+      "3つのミスをそれぞれ独立した問題として個別に対処する"],
+   a:2, ex:"<strong>具体→抽象（共通の根本課題を見つける）→具体（動ける粒度のアクション）</strong>の行き来が重要！"},
+
+  // ============ LEVEL 4 : Claude Code研修 (15問) ============
+  {theme:101,emoji:"💻",themeName:"Move Fast",level:4,
+   q:"TOKIUMのMove Fastの3要素に含まれないのは？",
+   c:["逆算思考","スピード追求","仕組み改善","品質最優先"],
+   a:3, ex:"Move Fastの3要素は<strong>逆算思考・スピード追求・仕組み改善</strong>。単に「早くやる」だけでなく、判断を溜めないことも重要。"},
+
+  {theme:102,emoji:"💻",themeName:"AIと人間の役割",level:4,
+   q:"「考えるのもAI、では人間の仕事は何？」の答えとして正しいのは？",
+   c:["プロンプトを書くこと","判断すること","AIの出力をそのまま送ること","ツールの使い方を覚えること"],
+   a:1, ex:"AIは調査・構成案・分析もやってくれる。<strong>人間の仕事は「判断」</strong>。AIの出力を削り、整え、GOを出すのが人間。"},
+
+  {theme:103,emoji:"💻",themeName:"ツール構成",level:4,
+   q:"Claude Codeを動かすために必要な「土台」となるソフトは？",
+   c:["Python","Node.js","Java","Ruby"],
+   a:1, ex:"Claude Codeを動かすには<strong>Node.js</strong>が必要。Node.js自体を使いこなす必要はなく、Claude Codeのために入れるだけ。"},
+
+  {theme:104,emoji:"💻",themeName:"AIへの伝え方",level:4,
+   q:"AIへの指示の出し方として最もおすすめなのは？",
+   c:["「自己紹介を作って」と結果を直接求める",
+      "「どう構成するのが良いですか？」と相談から入る",
+      "プロンプトエンジニアリングの技法を駆使する",
+      "できるだけ短い指示を出す"],
+   a:1, ex:"<strong>「やって」ではなく「どうしたらいい？」で始める</strong>のが一番おすすめ。AIが構成案を出す→それを見て「作って」と言えば的外れにならない。"},
+
+  {theme:105,emoji:"💻",themeName:"AIへの伝え方",level:4,
+   q:"AIへの指示で精度を劇的に上げるコツは？",
+   c:["できるだけ長い文章で指示する","専門用語をたくさん使う","「何のために」「誰向けに」を伝える","毎回同じテンプレートを使う"],
+   a:2, ex:"<strong>受け取る人が誰か（何のために・誰向けに）</strong>を伝えるとAIの出力精度が劇的に上がる。背景ごと渡すのが大事。"},
+
+  {theme:106,emoji:"💻",themeName:"CLAUDE.md",level:4,
+   q:"CLAUDE.mdの説明として正しいのは？",
+   c:["Claude Codeのインストールマニュアル",
+      "作業フォルダに置くと毎回Claudeが読み込む、AIにとっての業務マニュアル",
+      "Claudeの利用規約が書かれたファイル",
+      "エラーログが自動保存されるファイル"],
+   a:1, ex:"<strong>CLAUDE.md＝AIにとっての業務マニュアル</strong>。作業フォルダに置くと毎回自動で読み込まれ、使うほどAIが自分の仕事を理解する。"},
+
+  {theme:107,emoji:"💻",themeName:"Skills",level:4,
+   q:"Claude CodeのSkillsについて正しいのは？",
+   c:["AIの学習データを更新する機能",
+      "繰り返し作業をスラッシュコマンドで実行できるようにする仕組み",
+      "Claude Codeの処理速度を上げる設定",
+      "AIの回答の正確性を検証するツール"],
+   a:1, ex:"Skills＝<strong>AIへの手順書</strong>。一度作れば<strong>/コマンド名</strong>で何度でも同じ品質の仕事をAIが実行する。"},
+
+  {theme:108,emoji:"💻",themeName:"Skills",level:4,
+   q:"Skillファイルを置く正しい場所は？",
+   c:[".claude/config/に置く","プロジェクトのルートに置く",".claude/skills/の中にフォルダを作り、その中のSKILL.mdに書く","どこでもよい"],
+   a:2, ex:"Skillは<strong>.claude/skills/</strong>の中にフォルダを作り、その中の<strong>SKILL.md</strong>に手順を書く。"},
+
+  {theme:109,emoji:"💻",themeName:"MCP",level:4,
+   q:"MCPの説明として正しいのは？",
+   c:["Claude Codeの課金プラン名",
+      "Claude Codeが他のツール（Slack・Notion等）と自律的にやり取りするためのコネクター",
+      "AIモデルの性能を測定する指標",
+      "Claude Codeのセキュリティ認証の仕組み"],
+   a:1, ex:"MCP＝<strong>他ツールとの連携コネクター</strong>。SlackのMCPを接続するとSlackの情報を読み書きできるようになる。"},
+
+  {theme:110,emoji:"💻",themeName:"セキュリティ",level:4,
+   q:"Claude Codeに顧客リストを整理させた。Slack MCPが接続中で「Slackに共有しましょうか？」と提案された。うっかり許可すると何が起きる？",
+   c:["顧客情報が公開チャンネルに流出し、外部パートナーにも見える可能性がある",
+      "自動的に暗号化されるので問題ない",
+      "DMにだけ送られるので安全",
+      "Slack側でブロックされるので大丈夫"],
+   a:0, ex:"<strong>ボタン1つの「許可」が会社の信用を壊す</strong>。顧客名・契約金額がSlackの公開チャンネルに流出→外部パートナーにも見えてしまう。"},
+
+  {theme:111,emoji:"💻",themeName:"セキュリティ",level:4,
+   q:"CLAUDE.mdに本番DBの接続情報を書いてGitHubにpushした。リポジトリがPublicだった場合、何が起きうる？",
+   c:["GitHubが自動で削除してくれる",
+      "自動スキャンBotが接続情報を収集し、不正アクセス→全顧客データ流出につながりうる",
+      "Publicでも暗号化されるので問題ない",
+      "CLAUDE.mdはGitHubにpushされない仕様"],
+   a:1, ex:"<strong>自動スキャンBotが数分で接続情報を収集</strong>→本番DBに不正アクセス→全顧客の請求データが流出。「Publicのまま気づかなかった」は言い訳にならない。"},
+
+  {theme:112,emoji:"💻",themeName:"セキュリティ",level:4,
+   q:"「便利そうなMCPサーバー」をインストールする際、最も注意すべきことは？",
+   c:["星（スター）がたくさんついているか確認する",
+      "情シスが指定したホワイトリストに含まれているか確認する",
+      "最新バージョンかどうか確認する",
+      "無料かどうか確認する"],
+   a:1, ex:"MCPの接続先は<strong>ホワイトリスト方式</strong>で情シスが指定。リストにないものは連携しない。「星が多いから安全」は間違い。"},
+
+  {theme:113,emoji:"💻",themeName:"Git/GitHub",level:4,
+   q:"GitとGitHubの違いとして正しいのは？",
+   c:["同じもので、名前が違うだけ",
+      "Gitはローカルの変更履歴管理、GitHubはクラウドでの共有サービス",
+      "GitはMac用、GitHubはWindows用",
+      "Gitはコード専用、GitHubはドキュメント専用"],
+   a:1, ex:"<strong>Git＝自分のPC内での変更履歴管理</strong>、<strong>GitHub＝インターネット上でコードを共有</strong>するサービス。別物！"},
+
+  {theme:114,emoji:"💻",themeName:"モデル・運用",level:4,
+   q:"Claude Codeのモデルについて正しいのは？",
+   c:["常にOpusを使うのが最善",
+      "Opusは複雑な仕事向きだがトークン消費が大きいので、Sonnetに切り替えるのがおすすめ",
+      "SonnetよりOpusの方が処理が速い",
+      "モデルの違いは出力の言語だけ"],
+   a:1, ex:"<strong>Opusは複雑向きだがトークン消費大</strong>（利用制限が早くかかる）。<strong>/modelコマンドでSonnetに切り替え</strong>るのがおすすめ。"},
+
+  {theme:115,emoji:"💻",themeName:"エラー対処・心得",level:4,
+   q:"Claude Codeでエラーが出たとき、最も適切な対処法は？",
+   c:["自分でGoogle検索して解決する",
+      "エラー画面のスクショやメッセージをそのままClaudeに貼る",
+      "Cursorを再インストールする",
+      "エラーが消えるまで同じコマンドを繰り返す"],
+   a:1, ex:"<strong>エラーはClaudeに貼る。自分で解決しようとしない</strong>。それがこの研修で一番身につけてほしい習慣。"}
+];
+
+// ─── Quiz State ───
+var selectedLevel = 0;
+var currentQuestions = [];
+var currentIndex = 0;
+var correctCount = 0;
+var wrongThemes = [];
+var QUIZ_SIZE = 10;
+
+// ─── Functions ───
+function selectLevel(lv) {
+  selectedLevel = lv;
+  document.querySelectorAll('.level-card').forEach(function(c) { c.classList.remove('selected'); });
+  document.querySelector('.lv' + lv).classList.add('selected');
+  var btn = document.getElementById('start-btn');
+  btn.disabled = false;
+  var labels = {1:'Lv.1 基礎チェック スタート！',2:'Lv.2 応用チャレンジ スタート！',3:'Lv.3 実践マスター スタート！',4:'Claude Code クイズ スタート！'};
+  btn.textContent = labels[lv];
+}
+
+function shuffle(arr) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+function startQuiz() {
+  var pool = QUESTIONS.filter(function(q) { return q.level === selectedLevel; });
+  if (selectedLevel === 4) {
+    // CC course: all questions, shuffled
+    currentQuestions = shuffle(pool);
+  } else {
+    currentQuestions = shuffle(pool).slice(0, QUIZ_SIZE);
+  }
+  currentIndex = 0;
+  correctCount = 0;
+  wrongThemes = [];
+
+  document.getElementById('screen-start').classList.add('hidden');
+  document.getElementById('screen-quiz').classList.remove('hidden');
+
+  var levelLabels = {1:'Lv.1 基礎チェック',2:'Lv.2 応用チャレンジ',3:'Lv.3 実践マスター',4:'Claude Code研修クイズ','-1':'リベンジモード'};
+  document.getElementById('quiz-level-label').textContent = levelLabels[selectedLevel] || 'リベンジモード';
+
+  renderQuestion();
+}
+
+function renderQuestion() {
+  var q = currentQuestions[currentIndex];
+  var total = currentQuestions.length;
+  document.getElementById('quiz-progress-text').textContent = (currentIndex + 1) + ' / ' + total;
+  document.getElementById('quiz-progress-bar').style.width = ((currentIndex) / total * 100) + '%';
+
+  var diffClass = 'd' + q.level;
+  var diffLabel = {1:'基礎',2:'応用',3:'実践',4:'CC'}[q.level];
+  if (q.type === 'text') diffLabel = '記述';
+
+  var bodyHtml = '';
+
+  if (q.type === 'text') {
+    // ── Text question ──
+    bodyHtml = '<div class="text-input-area">' +
+      '<div class="kw-hint">必須キーワードを含めて回答しよう（' + q.minHit + '個以上でクリア！）</div>' +
+      '<textarea id="text-answer" placeholder="ここに回答を入力..."></textarea>' +
+      '<button class="submit-text-btn" id="submit-text-btn" onclick="answerText()">回答する</button>' +
+    '</div>';
+  } else {
+    // ── Choice question ──
+    var indices = [0,1,2,3];
+    var shuffled = shuffle(indices);
+    var correctShuffled = shuffled.indexOf(q.a);
+    var choiceLabels = ['A','B','C','D'];
+    var choicesHtml = '';
+    for (var i = 0; i < 4; i++) {
+      var origIdx = shuffled[i];
+      choicesHtml += '<button class="choice-btn" data-idx="' + i + '" data-correct="' + (i === correctShuffled ? '1' : '0') + '" onclick="answer(this)">' +
+        '<span class="choice-label">' + choiceLabels[i] + '</span>' +
+        '<span>' + q.c[origIdx] + '</span></button>';
     }
+    bodyHtml = '<div class="choices">' + choicesHtml + '</div>';
+  }
 
-    function check(btn, isCorrect) {
-      var area = btn.closest('.check-area');
-      if (area.dataset.answered) return;
-      area.dataset.answered = 'true';
+  var html = '<div class="q-card">' +
+    '<div class="q-meta">' +
+      '<span class="q-num">Q' + (currentIndex + 1) + '</span>' +
+      '<span class="q-theme-tag">' + q.emoji + ' ' + q.themeName + '</span>' +
+      '<span class="q-diff-tag ' + diffClass + '">' + diffLabel + '</span>' +
+    '</div>' +
+    '<div class="q-text">' + q.q + '</div>' +
+    bodyHtml +
+    '<div id="feedback-area" class="hidden"></div>' +
+    '<button id="next-btn" class="next-btn hidden" onclick="nextQuestion()">' +
+      (currentIndex < total - 1 ? '次の問題へ' : '結果を見る') +
+    '</button>' +
+  '</div>';
 
-      btn.classList.add('active');
-      answeredCount++;
+  document.getElementById('quiz-body').innerHTML = html;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
-      if (isCorrect) {
-        correctCount++;
+function answer(btn) {
+  if (btn.classList.contains('locked')) return;
+  var buttons = document.querySelectorAll('.choice-btn');
+  buttons.forEach(function(b) { b.classList.add('locked'); });
+
+  var isCorrect = btn.dataset.correct === '1';
+  var q = currentQuestions[currentIndex];
+
+  if (isCorrect) {
+    btn.classList.add('correct');
+    correctCount++;
+    removeFromRevenge(q);
+  } else {
+    btn.classList.add('wrong');
+    wrongThemes.push({ theme: q.theme, name: q.themeName, emoji: q.emoji });
+    addToRevenge(q);
+    buttons.forEach(function(b) {
+      if (b.dataset.correct === '1') b.classList.add('correct');
+    });
+  }
+
+  var fb = document.getElementById('feedback-area');
+  fb.className = 'feedback-area ' + (isCorrect ? 'is-correct' : 'is-wrong');
+  fb.innerHTML = '<div class="feedback-title">' + (isCorrect ? '正解！' : '不正解…') + '</div>' +
+    '<div class="feedback-text">' + q.ex + '</div>';
+
+  document.getElementById('next-btn').classList.remove('hidden');
+  document.getElementById('quiz-progress-bar').style.width = ((currentIndex + 1) / currentQuestions.length * 100) + '%';
+}
+
+function answerText() {
+  var textarea = document.getElementById('text-answer');
+  var submitBtn = document.getElementById('submit-text-btn');
+  var userAnswer = textarea.value.trim();
+  if (!userAnswer) return;
+
+  textarea.classList.add('locked');
+  textarea.readOnly = true;
+  submitBtn.disabled = true;
+
+  var q = currentQuestions[currentIndex];
+  var hits = [];
+  var misses = [];
+  q.keywords.forEach(function(kw) {
+    if (userAnswer.indexOf(kw) !== -1) { hits.push(kw); }
+    else { misses.push(kw); }
+  });
+
+  var isCorrect = hits.length >= q.minHit;
+
+  if (isCorrect) {
+    correctCount++;
+    removeFromRevenge(q);
+  } else {
+    wrongThemes.push({ theme: q.theme, name: q.themeName, emoji: q.emoji });
+    addToRevenge(q);
+  }
+
+  // Keyword result tags
+  var kwHtml = '<div class="kw-result">';
+  hits.forEach(function(k) { kwHtml += '<span class="kw-tag kw-hit">' + k + '</span>'; });
+  misses.forEach(function(k) { kwHtml += '<span class="kw-tag kw-miss">' + k + '</span>'; });
+  kwHtml += '</div>';
+
+  var fb = document.getElementById('feedback-area');
+  var title = isCorrect
+    ? '正解！（' + hits.length + '/' + q.keywords.length + ' キーワードヒット）'
+    : '不正解…（' + hits.length + '/' + q.keywords.length + ' キーワード。' + q.minHit + '個以上で正解）';
+  fb.className = 'feedback-area ' + (isCorrect ? 'is-correct' : 'is-wrong');
+  fb.innerHTML = '<div class="feedback-title">' + title + '</div>' + kwHtml +
+    '<div class="feedback-text" style="margin-top:10px;">' + q.ex + '</div>';
+
+  document.getElementById('next-btn').classList.remove('hidden');
+  document.getElementById('quiz-progress-bar').style.width = ((currentIndex + 1) / currentQuestions.length * 100) + '%';
+}
+
+// ─── Revenge Storage ───
+function getRevengeKey(q) {
+  return q.level + ':' + q.theme + ':' + q.q.substring(0, 30);
+}
+
+function addToRevenge(q) {
+  var list = JSON.parse(localStorage.getItem('revengeList') || '{}');
+  list[getRevengeKey(q)] = q;
+  localStorage.setItem('revengeList', JSON.stringify(list));
+}
+
+function removeFromRevenge(q) {
+  var list = JSON.parse(localStorage.getItem('revengeList') || '{}');
+  delete list[getRevengeKey(q)];
+  localStorage.setItem('revengeList', JSON.stringify(list));
+}
+
+function getRevengeQuestions() {
+  var list = JSON.parse(localStorage.getItem('revengeList') || '{}');
+  var arr = [];
+  for (var key in list) { arr.push(list[key]); }
+  return arr;
+}
+
+function startRevenge() {
+  var pool = getRevengeQuestions();
+  if (pool.length === 0) return;
+  selectedLevel = -1; // special marker
+  currentQuestions = shuffle(pool);
+  currentIndex = 0;
+  correctCount = 0;
+  wrongThemes = [];
+
+  document.getElementById('screen-start').classList.add('hidden');
+  document.getElementById('screen-quiz').classList.remove('hidden');
+  document.getElementById('quiz-level-label').textContent = 'リベンジモード';
+
+  renderQuestion();
+}
+
+function renderRevenge() {
+  var rq = getRevengeQuestions();
+  var section = document.getElementById('revenge-section');
+  if (rq.length === 0) {
+    section.classList.add('hidden');
+  } else {
+    section.classList.remove('hidden');
+    document.getElementById('revenge-count').textContent = rq.length + '問';
+  }
+}
+
+function nextQuestion() {
+  currentIndex++;
+  if (currentIndex >= currentQuestions.length) {
+    showResult();
+  } else {
+    renderQuestion();
+  }
+}
+
+function showResult(isPartial) {
+  document.getElementById('screen-quiz').classList.add('hidden');
+  document.getElementById('screen-result').classList.remove('hidden');
+
+  // For partial quit: count only answered questions
+  var answered = currentIndex;
+  var currentCard = document.querySelector('.choice-btn.locked') || document.querySelector('textarea.locked');
+  if (currentCard) answered = currentIndex + 1; // current Q was answered
+  var total = isPartial ? answered : currentQuestions.length;
+  if (total === 0) total = 1; // safety
+  var rate = correctCount / total;
+
+  // Emoji & message
+  var emoji, msg;
+  if (isPartial) {
+    emoji = '🛑';
+    msg = total + '問回答で中止。途中経過を記録したよ！';
+  } else if (rate >= 0.9) { emoji = '🎉'; msg = 'ほぼ完璧！自信を持って大丈夫！'; }
+  else if (rate >= 0.7) { emoji = '✨'; msg = 'いい感じ！あと少しで完璧！'; }
+  else if (rate >= 0.5) { emoji = '💪'; msg = '半分超え！苦手テーマを重点復習しよう'; }
+  else { emoji = '📖'; msg = '復習ノートでポイントを確認してからリトライ！'; }
+
+  document.getElementById('r-emoji').textContent = emoji;
+  document.getElementById('r-score').textContent = correctCount + ' / ' + total + ' 問正解' + (isPartial ? '（中止）' : '');
+  document.getElementById('r-msg').textContent = msg;
+
+  // Save to history
+  var history = JSON.parse(localStorage.getItem('quizHistory') || '[]');
+  var today = new Date().toLocaleDateString('ja-JP');
+  var entry = { date: today, level: selectedLevel, score: correctCount, total: total };
+  if (selectedLevel === -1) entry.level = 'revenge';
+
+  // Compare with previous same level
+  var prevSame = null;
+  for (var i = history.length - 1; i >= 0; i--) {
+    if (history[i].level === selectedLevel) { prevSame = history[i]; break; }
+  }
+  var compareHtml = '';
+  if (prevSame) {
+    var diff = correctCount - prevSame.score;
+    if (diff > 0) compareHtml = '前回 ' + prevSame.score + '/' + prevSame.total + ' → 今回 ' + correctCount + '/' + total + '  <span class="improve">+' + diff + ' UP!</span>';
+    else if (diff < 0) compareHtml = '前回 ' + prevSame.score + '/' + prevSame.total + ' → 今回 ' + correctCount + '/' + total + '  <span class="decline">' + diff + '</span>';
+    else compareHtml = '前回と同じスコア（' + correctCount + '/' + total + '）もう一段上を目指そう！';
+  }
+  document.getElementById('r-compare').innerHTML = compareHtml;
+
+  history.push(entry);
+  if (history.length > 20) history = history.slice(-20);
+  localStorage.setItem('quizHistory', JSON.stringify(history));
+
+  // Weak themes (deduplicate)
+  var weakHtml = '';
+  if (wrongThemes.length === 0) {
+    weakHtml = '<div class="all-correct-msg">全問正解！ 苦手テーマなし！</div>';
+  } else {
+    var seen = {};
+    wrongThemes.forEach(function(w) {
+      if (!seen[w.theme]) {
+        seen[w.theme] = true;
+        weakHtml += '<div class="weak-item">' +
+          '<span class="wi-emoji">' + w.emoji + '</span>' +
+          '<span class="wi-name">' + w.name + '</span>' +
+          '<span class="wi-tag">要復習</span>' +
+        '</div>';
       }
+    });
+  }
+  document.getElementById('r-weak').innerHTML = weakHtml;
 
-      document.getElementById('correct-count').textContent = correctCount;
-      document.getElementById('score-bar').style.width = (correctCount / total * 100) + '%';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
-      // Disable both buttons
-      var btns = area.querySelectorAll('.check-btn');
-      btns.forEach(function(b) {
-        if (!b.classList.contains('active')) {
-          b.style.opacity = '0.4';
-          b.style.cursor = 'default';
-        }
-      });
+function quitQuiz() {
+  var answered = Math.min(currentIndex + 1, currentQuestions.length);
+  // If the current question hasn't been answered yet, don't count it
+  var currentCard = document.querySelector('.choice-btn.locked') || document.querySelector('textarea.locked');
+  if (!currentCard) answered = currentIndex; // not yet answered this one
+  document.getElementById('modal-score-preview').textContent =
+    '現在: ' + correctCount + ' / ' + answered + ' 問正解（全' + currentQuestions.length + '問中）';
+  document.getElementById('quit-modal').classList.remove('hidden');
+}
 
-      if (answeredCount === total) {
-        showResult();
-      }
-    }
+function closeModal() {
+  document.getElementById('quit-modal').classList.add('hidden');
+}
 
-    function showResult() {
-      var area = document.getElementById('result-area');
-      var emoji = document.getElementById('result-emoji');
-      var msg = document.getElementById('result-msg');
-      var sub = document.getElementById('result-sub');
+function confirmQuit(saveResult) {
+  closeModal();
+  if (saveResult) {
+    // Show result screen with partial results
+    showResult(true);
+  } else {
+    // Discard — go straight home
+    document.getElementById('screen-quiz').classList.add('hidden');
+    document.getElementById('screen-start').classList.remove('hidden');
+    selectedLevel = 0;
+    document.querySelectorAll('.level-card').forEach(function(c) { c.classList.remove('selected'); });
+    var btn = document.getElementById('start-btn');
+    btn.disabled = true;
+    btn.textContent = 'レベルを選んでね';
+    renderHistory();
+    renderRevenge();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
 
-      var rate = correctCount / total;
+function retryQuiz() {
+  document.getElementById('screen-result').classList.add('hidden');
+  startQuiz();
+}
 
-      if (rate >= 0.9) {
-        emoji.textContent = '🎉';
-        msg.textContent = correctCount + ' / ' + total + ' 問正解！すごい！';
-        sub.textContent = 'ほぼ完璧！自信を持って大丈夫だよ！';
-      } else if (rate >= 0.7) {
-        emoji.textContent = '✨';
-        msg.textContent = correctCount + ' / ' + total + ' 問正解！いい感じ！';
-        sub.textContent = 'あとちょっと！間違えたところを復習ノートで確認しよう';
-      } else if (rate >= 0.5) {
-        emoji.textContent = '💪';
-        msg.textContent = correctCount + ' / ' + total + ' 問正解！';
-        sub.textContent = '半分以上できてる！苦手なテーマを重点的に復習してみよう';
-      } else {
-        emoji.textContent = '📖';
-        msg.textContent = correctCount + ' / ' + total + ' 問正解';
-        sub.textContent = 'まずは復習ノートでポイントを確認してから、もう一回チャレンジ！';
-      }
+function goHome() {
+  document.getElementById('screen-result').classList.add('hidden');
+  document.getElementById('screen-quiz').classList.add('hidden');
+  document.getElementById('screen-start').classList.remove('hidden');
+  selectedLevel = 0;
+  document.querySelectorAll('.level-card').forEach(function(c) { c.classList.remove('selected'); });
+  var btn = document.getElementById('start-btn');
+  btn.disabled = true;
+  btn.textContent = 'レベルを選んでね';
+  renderHistory();
+  renderRevenge();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
-      area.classList.add('show');
-      area.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  </script>
+function renderHistory() {
+  var history = JSON.parse(localStorage.getItem('quizHistory') || '[]');
+  var container = document.getElementById('history-list');
+  if (history.length === 0) {
+    container.innerHTML = '<div class="no-history">まだ記録がないよ。クイズに挑戦してみよう！</div>';
+    return;
+  }
+  var html = '<div class="history-list">';
+  var levelLabels = {1:'Lv.1 基礎',2:'Lv.2 応用',3:'Lv.3 実践',4:'CC研修','revenge':'リベンジ'};
+  var levelClasses = {1:'l1',2:'l2',3:'l3',4:'l4','revenge':'l3'};
+  // Show latest 5 in reverse
+  var recent = history.slice(-5).reverse();
+  recent.forEach(function(h) {
+    html += '<div class="history-item">' +
+      '<span class="hi-date">' + h.date + '</span>' +
+      '<span class="hi-level ' + levelClasses[h.level] + '">' + levelLabels[h.level] + '</span>' +
+      '<span class="hi-score">' + h.score + ' / ' + h.total + '</span>' +
+    '</div>';
+  });
+  html += '</div>';
+  container.innerHTML = html;
+}
 
+// ─── Init ───
+renderHistory();
+renderRevenge();
+</script>
 </body>
 </html>
