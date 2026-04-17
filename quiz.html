@@ -254,6 +254,58 @@
     .mbtn-cancel { background:#f5f5f5; color:#888; }
     .mbtn-cancel:hover { background:#eee; }
 
+    /* ── User Name Display ── */
+    .user-name-bar {
+      text-align:center; margin-bottom:12px; font-size:.88rem; color:#00695c;
+      animation:fadeIn .3s ease;
+    }
+    .user-name-bar .user-name-text { font-weight:bold; }
+    .user-name-bar .user-name-change {
+      font-size:.75rem; color:#80cbc4; cursor:pointer; margin-left:6px;
+      text-decoration:underline; border:none; background:none; font-family:inherit;
+    }
+    .user-name-bar .user-name-change:hover { color:#00897b; }
+
+    /* ── Name Modal ── */
+    .name-modal-overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:200;
+      display:flex; align-items:center; justify-content:center; animation:fadeIn .2s ease;
+    }
+    .name-modal-box {
+      background:#fff; border-radius:20px; padding:28px 24px; max-width:380px; width:90%;
+      box-shadow:0 12px 40px rgba(0,0,0,.18); animation:fadeUp .25s ease both;
+    }
+    .name-modal-box h3 { font-size:1.05rem; color:#00695c; margin-bottom:6px; text-align:center; }
+    .name-modal-box .name-modal-sub {
+      font-size:.82rem; color:#888; margin-bottom:16px; line-height:1.5; text-align:center;
+    }
+    .name-modal-box .name-modal-note {
+      font-size:.75rem; color:#e57373; margin-bottom:12px; text-align:center; line-height:1.4;
+    }
+    .name-modal-box input {
+      width:100%; padding:12px 14px; border:2px solid #e0e0e0; border-radius:12px;
+      font-size:.95rem; font-family:inherit; color:#444; transition:border-color .2s;
+      box-sizing:border-box;
+    }
+    .name-modal-box input:focus { outline:none; border-color:#80cbc4; }
+    .name-modal-box .name-modal-error {
+      font-size:.78rem; color:#e57373; margin-top:6px; min-height:1.2em;
+    }
+    .name-modal-box .name-modal-actions { display:flex; gap:10px; justify-content:center; margin-top:16px; }
+    .name-modal-box .name-modal-actions button {
+      padding:10px 24px; border-radius:22px; font-size:.88rem; font-weight:bold;
+      cursor:pointer; font-family:inherit; border:none; transition:all .2s;
+    }
+    .nbtn-ok { background:linear-gradient(135deg,#80cbc4,#00897b); color:#fff; }
+    .nbtn-ok:hover { transform:translateY(-1px); box-shadow:0 4px 10px rgba(0,105,92,.25); }
+    .nbtn-cancel { background:#f5f5f5; color:#888; }
+    .nbtn-cancel:hover { background:#eee; }
+
+    /* ── GAS Send Status ── */
+    .gas-status {
+      font-size:.78rem; color:#80cbc4; margin-top:10px; min-height:1.2em; text-align:center;
+    }
+
     /* ── Responsive ── */
     @media (max-width:600px) {
       body { padding:16px 10px 60px; }
@@ -265,16 +317,33 @@
 </head>
 <body>
 
+<!-- ========== NAME INPUT MODAL ========== -->
+<div id="name-modal" class="name-modal-overlay hidden">
+  <div class="name-modal-box">
+    <h3>ニックネームを入力してね</h3>
+    <div class="name-modal-sub">クイズの記録やSlack通知に使われます</div>
+    <div class="name-modal-note">※ 入力した名前はSlackのチャンネルに通知されることがあります</div>
+    <input type="text" id="name-input" placeholder="例: あやな" maxlength="20">
+    <div class="name-modal-error" id="name-error"></div>
+    <div class="name-modal-actions">
+      <button class="nbtn-ok" onclick="confirmName()">決定</button>
+      <button class="nbtn-cancel hidden" id="name-cancel-btn" onclick="cancelName()">キャンセル</button>
+    </div>
+  </div>
+</div>
+
 <!-- ========== START SCREEN ========== -->
 <div id="screen-start" class="start-screen">
   <div class="page-header">
     <h1>効果測定クイズ</h1>
     <p>ランダム10問で実力チェック！ レベルを選んでスタート</p>
   </div>
+  <div id="user-name-bar" class="user-name-bar hidden"></div>
 
   <nav class="nav-bar">
-    <a href="index.html">復習ノート</a>
+    <a href="review.html">復習ノート</a>
     <a href="quiz.html" class="current">クイズに挑戦</a>
+    <a href="index.html">ポートフォリオ</a>
   </nav>
 
   <div class="level-cards">
@@ -359,6 +428,7 @@
     <div class="result-score" id="r-score"></div>
     <div class="result-msg" id="r-msg"></div>
     <div class="result-comparison" id="r-compare"></div>
+    <div class="gas-status" id="gas-status"></div>
   </div>
   <div class="weak-section">
     <h3>苦手テーマ</h3>
@@ -371,6 +441,9 @@
 </div>
 
 <script>
+// ─── GAS Endpoint ───
+var GAS_ENDPOINT = 'https://script.google.com/a/macros/tokium.jp/s/AKfycbxkbg1YZdmNVwT54cB27C3kNj1J628RwXrrCrWAr94KlTarTniIP2xU_hwdT98u2DjYRA/exec';
+
 // ─── Question Bank ───
 var QUESTIONS = [
 
@@ -896,6 +969,131 @@ var currentIndex = 0;
 var correctCount = 0;
 var wrongThemes = [];
 var QUIZ_SIZE = 10;
+var quizStartTime = null;
+
+// ─── User Name ───
+var nameModalCallback = null;
+
+function getUserName() {
+  return localStorage.getItem('quiz_user_name') || '';
+}
+
+function renderUserNameBar() {
+  var bar = document.getElementById('user-name-bar');
+  var name = getUserName();
+  if (name) {
+    bar.innerHTML = '<span class="user-name-text">' + escapeHtml(name) + ' さん</span>' +
+      '<button class="user-name-change" onclick="openNameModal(true)">変更</button>';
+    bar.classList.remove('hidden');
+  } else {
+    bar.classList.add('hidden');
+  }
+}
+
+function escapeHtml(str) {
+  var d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+function openNameModal(isChange) {
+  var modal = document.getElementById('name-modal');
+  var input = document.getElementById('name-input');
+  var cancelBtn = document.getElementById('name-cancel-btn');
+  var errorEl = document.getElementById('name-error');
+  errorEl.textContent = '';
+  input.value = isChange ? getUserName() : '';
+  // Show cancel button only when changing (not on first time)
+  if (isChange) {
+    cancelBtn.classList.remove('hidden');
+  } else {
+    cancelBtn.classList.add('hidden');
+  }
+  modal.classList.remove('hidden');
+  setTimeout(function() { input.focus(); }, 100);
+}
+
+function confirmName() {
+  var input = document.getElementById('name-input');
+  var errorEl = document.getElementById('name-error');
+  var name = input.value.trim();
+
+  if (!name) {
+    errorEl.textContent = '名前を入力してね';
+    return;
+  }
+  if (name.length > 20) {
+    errorEl.textContent = '20文字以内で入力してね';
+    return;
+  }
+
+  localStorage.setItem('quiz_user_name', name);
+  document.getElementById('name-modal').classList.add('hidden');
+  renderUserNameBar();
+
+  if (nameModalCallback) {
+    var cb = nameModalCallback;
+    nameModalCallback = null;
+    cb();
+  }
+}
+
+function cancelName() {
+  document.getElementById('name-modal').classList.add('hidden');
+  nameModalCallback = null;
+}
+
+// Handle Enter key in name input
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !document.getElementById('name-modal').classList.contains('hidden')) {
+    confirmName();
+  }
+});
+
+// ─── GAS Send ───
+function getLevelLabel(lv) {
+  var map = {1:'Lv.1', 2:'Lv.2', 3:'Lv.3', 4:'CC'};
+  return map[lv] || '';
+}
+
+function sendResultToGAS(score, total, wrongThemeNames, durationSec) {
+  // Skip if endpoint not configured
+  if (!GAS_ENDPOINT || GAS_ENDPOINT === 'ここに後で貼る') {
+    console.warn('[Quiz] GAS_ENDPOINT未設定のためスキップ');
+    return;
+  }
+  // Skip for revenge mode
+  if (selectedLevel === -1) return;
+
+  var statusEl = document.getElementById('gas-status');
+  statusEl.textContent = '記録を送信中...';
+
+  var payload = {
+    userName: getUserName(),
+    level: getLevelLabel(selectedLevel),
+    score: score,
+    totalQuestions: total,
+    correctRate: total > 0 ? Math.round((score / total) * 1000) / 1000 : 0,
+    wrongThemes: wrongThemeNames,
+    timestamp: new Date().toISOString(),
+    durationSec: durationSec
+  };
+
+  try {
+    fetch(GAS_ENDPOINT, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    }).then(function() {
+      statusEl.textContent = '記録しました';
+    }).catch(function() {
+      statusEl.textContent = '';
+    });
+  } catch (e) {
+    statusEl.textContent = '';
+  }
+}
 
 // ─── Functions ───
 function selectLevel(lv) {
@@ -918,6 +1116,13 @@ function shuffle(arr) {
 }
 
 function startQuiz() {
+  // Check username first
+  if (!getUserName()) {
+    nameModalCallback = startQuiz;
+    openNameModal(false);
+    return;
+  }
+
   var pool = QUESTIONS.filter(function(q) { return q.level === selectedLevel; });
   if (selectedLevel === 4) {
     // CC course: all questions, shuffled
@@ -928,6 +1133,7 @@ function startQuiz() {
   currentIndex = 0;
   correctCount = 0;
   wrongThemes = [];
+  quizStartTime = Date.now();
 
   document.getElementById('screen-start').classList.add('hidden');
   document.getElementById('screen-quiz').classList.remove('hidden');
@@ -1092,6 +1298,13 @@ function getRevengeQuestions() {
 }
 
 function startRevenge() {
+  // Check username first
+  if (!getUserName()) {
+    nameModalCallback = startRevenge;
+    openNameModal(false);
+    return;
+  }
+
   var pool = getRevengeQuestions();
   if (pool.length === 0) return;
   selectedLevel = -1; // special marker
@@ -1099,6 +1312,7 @@ function startRevenge() {
   currentIndex = 0;
   correctCount = 0;
   wrongThemes = [];
+  quizStartTime = Date.now();
 
   document.getElementById('screen-start').classList.add('hidden');
   document.getElementById('screen-quiz').classList.remove('hidden');
@@ -1196,6 +1410,19 @@ function showResult(isPartial) {
   }
   document.getElementById('r-weak').innerHTML = weakHtml;
 
+  // Send to GAS
+  document.getElementById('gas-status').textContent = '';
+  var durationSec = quizStartTime ? Math.round((Date.now() - quizStartTime) / 1000) : 0;
+  var wrongThemeNames = [];
+  var seenForGAS = {};
+  wrongThemes.forEach(function(w) {
+    if (!seenForGAS[w.theme]) {
+      seenForGAS[w.theme] = true;
+      wrongThemeNames.push(w.name);
+    }
+  });
+  sendResultToGAS(correctCount, total, wrongThemeNames, durationSec);
+
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -1276,6 +1503,7 @@ function renderHistory() {
 }
 
 // ─── Init ───
+renderUserNameBar();
 renderHistory();
 renderRevenge();
 </script>
