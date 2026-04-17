@@ -301,7 +301,7 @@
     .nbtn-cancel { background:#f5f5f5; color:#888; }
     .nbtn-cancel:hover { background:#eee; }
 
-    /* ── GAS Send Status ── */
+    /* ── Send Status ── */
     .gas-status {
       font-size:.78rem; color:#80cbc4; margin-top:10px; min-height:1.2em; text-align:center;
     }
@@ -341,9 +341,8 @@
   <div id="user-name-bar" class="user-name-bar hidden"></div>
 
   <nav class="nav-bar">
-    <a href="review.html">復習ノート</a>
+    <a href="index.html">復習ノート</a>
     <a href="quiz.html" class="current">クイズに挑戦</a>
-    <a href="index.html">ポートフォリオ</a>
   </nav>
 
   <div class="level-cards">
@@ -441,8 +440,10 @@
 </div>
 
 <script>
-// ─── GAS Endpoint ───
-var GAS_ENDPOINT = 'https://script.google.com/a/macros/tokium.jp/s/AKfycbxkbg1YZdmNVwT54cB27C3kNj1J628RwXrrCrWAr94KlTarTniIP2xU_hwdT98u2DjYRA/exec';
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  ここに GAS デプロイ URL を貼り付けてください             ║
+// ╚══════════════════════════════════════════════════════════════╝
+var GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyhAoIueVLt4aWx2PXlfS6HXWc6npi_FiEEiXAkq3th4HK8J2owPyY2tb5r8y-RHztrqw/exec';
 
 // ─── Question Bank ───
 var QUESTIONS = [
@@ -1057,12 +1058,10 @@ function getLevelLabel(lv) {
 }
 
 function sendResultToGAS(score, total, wrongThemeNames, durationSec) {
-  // Skip if endpoint not configured
   if (!GAS_ENDPOINT || GAS_ENDPOINT === 'ここに後で貼る') {
     console.warn('[Quiz] GAS_ENDPOINT未設定のためスキップ');
     return;
   }
-  // Skip for revenge mode
   if (selectedLevel === -1) return;
 
   var statusEl = document.getElementById('gas-status');
