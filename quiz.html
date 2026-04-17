@@ -1409,18 +1409,20 @@ function showResult(isPartial) {
   }
   document.getElementById('r-weak').innerHTML = weakHtml;
 
-  // Send to GAS
+  // Send to GAS (中断時は送信しない — 最後まで解いた結果だけ記録)
   document.getElementById('gas-status').textContent = '';
-  var durationSec = quizStartTime ? Math.round((Date.now() - quizStartTime) / 1000) : 0;
-  var wrongThemeNames = [];
-  var seenForGAS = {};
-  wrongThemes.forEach(function(w) {
-    if (!seenForGAS[w.theme]) {
-      seenForGAS[w.theme] = true;
-      wrongThemeNames.push(w.name);
-    }
-  });
-  sendResultToGAS(correctCount, total, wrongThemeNames, durationSec);
+  if (!isPartial) {
+    var durationSec = quizStartTime ? Math.round((Date.now() - quizStartTime) / 1000) : 0;
+    var wrongThemeNames = [];
+    var seenForGAS = {};
+    wrongThemes.forEach(function(w) {
+      if (!seenForGAS[w.theme]) {
+        seenForGAS[w.theme] = true;
+        wrongThemeNames.push(w.name);
+      }
+    });
+    sendResultToGAS(correctCount, total, wrongThemeNames, durationSec);
+  }
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
